@@ -1,0 +1,1423 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Asignación de asientos</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";font-weight:400;font-style:normal;src:url(fonts/atkinson-hyperlegible-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Atkinson Hyperlegible";font-weight:700;font-style:normal;src:url(fonts/atkinson-hyperlegible-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:600;font-style:normal;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:700;font-style:normal;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format("woff2")}
+/* Layout: panel amarillo tipo cartel de salidas arriba (fijo), buscador grande, lista alfabética de filas grandes para pulsar con el pulgar */
+:root{
+  --bg:#F2F3EF; --surface:#FFFFFF; --ink:#15181A; --muted:#596164; --line:#D8DCD5;
+  --sign:#FFC72C; --sign-ink:#15181A; --ok:#1B7A4C; --ok-bg:#DCF0E3; --danger:#B3261E;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1214; --surface:#181C1F; --ink:#EEF1EE; --muted:#9BA4A7; --line:#2B3236;
+  --sign:#FFC72C; --sign-ink:#121314; --ok:#52C890; --ok-bg:#143425; --danger:#FF8A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1214; --surface:#181C1F; --ink:#EEF1EE; --muted:#9BA4A7; --line:#2B3236;
+  --sign:#FFC72C; --sign-ink:#121314; --ok:#52C890; --ok-bg:#143425; --danger:#FF8A80; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:17px;line-height:1.35;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:0 120px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+
+/* Cartel superior */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px 8px;display:grid;gap:10px}
+.board{background:var(--sign);color:var(--sign-ink);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.board .flight{flex:1;min-width:0;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.04em;text-transform:uppercase;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board .flight small{display:block;font-family:var(--body);font-weight:700;font-size:12px;letter-spacing:.08em;opacity:.75}
+.count{font-family:var(--display);font-weight:700;font-size:44px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.count span{font-size:24px;opacity:.7}
+.menuBtn{background:transparent;border:2px solid var(--sign-ink);border-radius:8px;width:44px;height:44px;display:grid;place-items:center;flex:none}
+.bar{height:6px;border-radius:3px;background:color-mix(in srgb,var(--sign-ink) 18%,transparent);margin-top:6px;overflow:hidden}
+.lists{display:grid;gap:4px;border:2px solid var(--sign);border-radius:10px;padding:6px 10px;background:var(--surface)}
+.lists div{display:flex;align-items:baseline;gap:8px;font-size:14px;font-variant-numeric:tabular-nums}
+.lists b{flex:none;background:var(--sign);color:var(--sign-ink);border-radius:5px;padding:0 6px;font-size:12px;font-weight:700}
+.lists span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.lists strong{flex:none}
+.bar i{display:block;height:100%;background:var(--sign-ink);width:0;transition:width .25s}
+
+.search{position:relative}
+#q{width:100%;box-sizing:border-box;font:inherit;font-size:22px;font-weight:700;padding:14px 48px 14px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);text-transform:uppercase}
+#q::placeholder{text-transform:none;font-weight:400;font-size:17px;color:var(--muted)}
+#q:focus{border-color:var(--ink)}
+#clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:transparent;font-size:24px;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tabs button{border:2px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 4px;font-weight:700;font-size:15px}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs b{font-variant-numeric:tabular-nums}
+
+/* Lista */
+.list{display:grid;gap:0;margin-top:4px}
+.letter{font-family:var(--display);font-weight:700;font-size:20px;color:var(--muted);padding:12px 4px 4px;border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:10px;padding:12px 6px;border-bottom:1px solid var(--line);background:transparent;border-inline:0;border-top:0;text-align:left;width:100%}
+.row .who{flex:1;min-width:0}
+.row .ap{font-weight:700;font-size:19px;letter-spacing:.01em;word-break:break-word}
+.row .no{font-size:17px}
+.row .meta{font-size:13px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.row .chk{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700}
+.row.ok{background:var(--ok-bg)}
+.row.ok .chk{background:var(--ok);border-color:var(--ok);color:var(--bg)}
+.row.ok .ap{color:var(--ok)}
+.pill{flex:none;border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:8px 10px;font-weight:700;font-size:14px;white-space:nowrap}
+.pill.ghost{border-color:var(--line);color:var(--muted)}
+.row.flash{animation:flash .5s}
+@keyframes flash{from{background:var(--ok)}to{background:var(--ok-bg)}}
+.note{padding:14px 6px;color:var(--muted);font-size:15px}
+.note strong{color:var(--ink)}
+.empty-ok{padding:28px 6px;text-align:center}
+.empty-ok .big{font-family:var(--display);font-weight:700;font-size:34px;color:var(--ok)}
+
+/* Estado vacío */
+.start{padding-block:20px;display:grid;gap:16px}
+.start h1{font-family:var(--display);font-weight:700;font-size:40px;line-height:1;margin:0;text-wrap:balance}
+.start p{margin:0;color:var(--muted);max-width:60ch}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:10px;padding:14px 16px;font-weight:700;font-size:17px;width:100%;box-sizing:border-box}
+.btn.alt{background:var(--surface);color:var(--ink)}
+.btn.danger{background:var(--surface);color:var(--danger);border-color:var(--danger)}
+.stack{display:grid;gap:10px}
+.howto{border-top:1px solid var(--line);padding-top:14px;display:grid;gap:8px;font-size:15px}
+.howto h2{font-family:var(--display);font-size:22px;margin:0}
+.howto ol{margin:0;padding-left:20px;display:grid;gap:6px}
+
+/* Hoja de menú */
+.sheet{position:fixed;inset:0;z-index:20;background:color-mix(in srgb,#000 45%,transparent);display:flex;align-items:flex-end}
+.sheet .panel{background:var(--bg);width:100%;max-width:640px;margin:0 auto;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;max-height:85vh;overflow:auto;box-sizing:border-box}
+.panel h2{font-family:var(--display);font-size:26px;margin:0}
+.panel .sub{font-size:14px;color:var(--muted);margin:0}
+textarea{width:100%;box-sizing:border-box;min-height:120px;font:inherit;font-size:15px;border:2px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);color:var(--ink)}
+.groups{display:grid;gap:6px;font-size:15px}
+.groups div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-block:6px;font-variant-numeric:tabular-nums}
+
+/* Avisos */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;width:min(600px,calc(100% - 32px));box-sizing:border-box;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.toast span{flex:1;min-width:0;font-weight:700}
+.toast button{background:transparent;border:2px solid var(--bg);color:var(--bg);border-radius:8px;padding:8px 12px;font-weight:700;flex:none}
+.warn{background:var(--surface);border:2px solid var(--danger);color:var(--danger);border-radius:10px;padding:10px 12px;font-size:14px}
+/* PDF */
+.pdfBox{border:2px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;background:var(--surface)}
+.pdfBox h3{font-family:var(--display);font-size:20px;margin:0}
+.pdfBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pdfBtns .btn{padding:12px 4px;font-size:15px}
+.pdfBtns .btn[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink);border-color:var(--sign-ink)}
+.pdfReady{display:grid;gap:8px}
+.pdfName{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+/* Voz y cámara */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mode{display:flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);background:var(--surface);border-radius:10px;padding:10px;font-weight:700;font-size:17px}
+.mode[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink);border-color:var(--sign-ink)}
+.top>*,.scanner>*{min-width:0}
+.scanner{display:grid;gap:8px;min-width:0}
+.video{position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;width:100%;max-width:100%}
+.video video{position:absolute;inset:0;width:100%;height:100%;max-width:100%;object-fit:cover;display:block}
+.guide{position:absolute;inset:12% 6%;border:3px solid var(--sign);border-radius:8px;box-shadow:0 0 0 999px rgba(0,0,0,.35);pointer-events:none}
+.torch{position:absolute;right:8px;bottom:8px;border:2px solid #fff;background:rgba(0,0,0,.5);color:#fff;border-radius:8px;padding:6px 10px;font-weight:700;font-size:14px}
+.listen{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--muted)}
+.listen i{width:5px;height:16px;border-radius:3px;background:var(--sign);animation:pulse 1s infinite ease-in-out}
+.listen i:nth-child(2){animation-delay:.15s}.listen i:nth-child(3){animation-delay:.3s}
+.listen span{margin-left:6px}
+@keyframes pulse{50%{transform:scaleY(.35)}}
+.hit{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;display:grid;gap:4px}
+.hit #hitMain{font-weight:700;font-size:19px}
+.hit.good{border-color:var(--ok);background:var(--ok-bg)}
+.hit.good #hitMain{color:var(--ok)}
+.hit.bad{border-color:var(--danger)}
+.hitSub{font-size:13px;color:var(--muted);word-break:break-word}
+.hitAct{display:flex;flex-wrap:wrap;gap:6px}
+.hitAct:empty{display:none}
+/* Asiento */
+.seat{flex:none;min-width:58px;border:2px solid var(--ink);background:var(--surface);border-radius:8px;padding:4px 6px;text-align:center;line-height:1.05}
+.seat small{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.seat b{font-family:var(--display);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+.seat.none{border-color:var(--danger);color:var(--danger)}
+.seat.none b{font-size:15px}
+.row.ok .seat{border-color:var(--ok)}
+.seatBig{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;color:var(--ink)}
+select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.groups .bad{color:var(--danger)}
+@media (prefers-reduced-motion:reduce){.listen i{animation:none}}
+@media (prefers-reduced-motion:reduce){.row.flash{animation:none}.bar i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="top" id="top" hidden>
+    <div class="board">
+      <div class="flight" id="flight"></div>
+      <div class="count" id="count">0<span>/0</span></div>
+      <button class="menuBtn" id="menuBtn" aria-label="Menú">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+    <div class="lists" id="lists" hidden></div>
+    <div class="search">
+      <input id="q" type="search" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"
+        placeholder="Apellido, DNI o asiento (12A)" aria-label="Buscar pasajero">
+      <button id="clear" aria-label="Borrar búsqueda" hidden>×</button>
+    </div>
+    <div class="modes">
+      <button class="mode" id="voiceBtn" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <span>Voz</span>
+      </button>
+      <button class="mode" id="camBtn" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>
+        <span>Cámara</span>
+      </button>
+    </div>
+    <div class="scanner" id="scanner" hidden>
+      <div class="video" id="videoBox" hidden>
+        <video id="video" playsinline muted></video>
+        <div class="guide"></div>
+        <button class="torch" id="torchBtn" hidden>Linterna</button>
+      </div>
+      <div class="listen" id="listenBox" hidden><i></i><i></i><i></i><span id="listenText">Escuchando. Que digan nombre y apellidos.</span></div>
+      <div class="hit" id="hit"><div id="hitMain">Preparando…</div><div class="hitSub" id="hitSub"></div><div class="hitAct" id="hitAct"></div></div>
+    </div>
+    <div class="tabs" role="group" aria-label="Filtro">
+      <button id="t-pend" aria-pressed="true">Faltan <b id="n-pend">0</b></button>
+      <button id="t-ok" aria-pressed="false">Presentes <b id="n-ok">0</b></button>
+      <button id="t-all" aria-pressed="false">Todos <b id="n-all">0</b></button>
+    </div>
+  </div>
+
+  <div id="storageWarn" class="warn" hidden>Este navegador no está guardando el progreso. No cierres ni recargues la página hasta terminar.</div>
+
+  <section class="start" id="start" hidden>
+    <h1>Asignación de asientos</h1>
+    <p>Para empezar, carga el listado de viajeros en PDF (puedes añadir varios). Después carga el PDF de coches y asientos reservados: la app reparte los asientos, sienta juntas a las personas de una misma reserva y deja la lista lista para pasar lista. Todo se guarda solo en este móvil.</p>
+    <div class="stack">
+      <button class="btn" id="startPdf">Cargar listado PDF</button>
+      <button class="btn alt" id="startCsv">Pegar o cargar lista (CSV / texto)</button>
+      <button class="btn alt" id="startDemo">Probar con un ejemplo</button>
+    </div>
+    <div class="howto">
+      <h2>Cómo marcar rápido</h2>
+      <ol>
+        <li><strong>Cámara:</strong> deja la cámara abierta y que cada persona enseñe su DNI o su tarjeta dentro del recuadro. Se marca sola.</li>
+        <li><strong>Voz:</strong> pulsa Voz una sola vez. La app escucha sin parar: cada persona dice su nombre y sus dos apellidos y queda marcada sola.</li>
+        <li><strong>Teclado:</strong> escribe 3 o 4 letras del primer apellido. Si sale una sola persona, pulsa Intro.</li>
+        <li>Si viajan en pareja, el botón <strong>Ambos</strong> marca a las dos personas de la reserva.</li>
+        <li>Al marcar a alguien, la app enseña en grande su <strong>coche y asiento</strong> para decírselo. Tocando el asiento de una fila puedes cambiarlo o intercambiarlo.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="list" id="list"></div>
+</div>
+
+<input type="file" id="filePdf" accept="application/pdf,.pdf" multiple hidden>
+<input type="file" id="fileCsv" accept=".csv,.txt,text/csv,text/plain" hidden>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle">Listado</h2>
+    <div class="groups" id="groups"></div>
+    <div class="pdfBox">
+      <h3>Obtener PDF</h3>
+      <button class="btn alt" id="pdf-seat">Asignación de asientos</button>
+      <div class="pdfBtns">
+        <button class="btn alt" id="pdf-pend">Pendientes</button>
+        <button class="btn alt" id="pdf-ok">Presentes</button>
+        <button class="btn alt" id="pdf-all">Listado completo</button>
+      </div>
+      <div id="pdfReady" class="pdfReady" hidden>
+        <div class="pdfName" id="pdfName"></div>
+        <button class="btn" id="pdfShare">Compartir (WhatsApp, correo…)</button>
+        <button class="btn alt" id="pdfSave">Guardar en el móvil</button>
+      </div>
+    </div>
+    <button class="btn alt" id="copyReport">Copiar resumen en texto (quién falta)</button>
+    <textarea id="reportBox" readonly hidden></textarea>
+    <button class="btn alt" id="seatPdfMenu">Cargar o cambiar PDF de coches y asientos</button>
+    <button class="btn alt" id="reassign">Volver a repartir todos los asientos</button>
+    <button class="btn alt" id="addPdf">Añadir otro listado PDF</button>
+    <button class="btn alt" id="addCsv">Añadir lista CSV / texto</button>
+    <div id="confirmZone" class="stack"></div>
+    <button class="btn danger" id="resetMarks">Desmarcar a todos</button>
+    <button class="btn danger" id="wipe">Borrar listados y empezar de cero</button>
+    <button class="btn alt" id="closeSheet">Cerrar</button>
+  </div>
+</div>
+
+<div class="sheet" id="resumeSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="resumeTitle">
+    <h2 id="resumeTitle">¿Qué listado usamos?</h2>
+    <p class="sub" id="resumeSub">Tienes listados guardados en este móvil:</p>
+    <div class="groups" id="resumeInfo"></div>
+    <button class="btn" id="resumeNew">Borrar lo anterior y empezar de cero</button>
+    <button class="btn alt" id="resumeKeep">Seguir con lo guardado</button>
+    <button class="btn alt" id="resumeAdd">Añadir más listados a lo guardado</button>
+    <p class="sub">«Empezar de cero» borra los listados, los asientos y las marcas guardadas, y te pide el PDF nuevo.</p>
+  </div>
+</div>
+
+<div class="sheet" id="moreSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
+    <h2 id="moreTitle">¿Hay más listados?</h2>
+    <p class="sub">Si hoy viaja otro grupo en el mismo tren, añade su listado. Todas las personas se juntan en una sola lista para pasar lista y repartir asientos, y en los informes salen separadas por listado.</p>
+    <div class="groups" id="moreInfo"></div>
+    <button class="btn" id="moreYes">Sí, añadir otro listado PDF</button>
+    <button class="btn alt" id="moreCsv">Sí, añadir lista CSV / texto</button>
+    <button class="btn alt" id="moreNo">No, seguir con los asientos</button>
+  </div>
+</div>
+
+<div class="sheet" id="csvSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="csvTitle">
+    <h2 id="csvTitle">Pegar lista</h2>
+    <p class="sub">Una persona por línea: <strong>Apellidos; Nombre; Documento; Reserva</strong>. Documento y reserva son opcionales.</p>
+    <textarea id="csvText" placeholder="GARCIA LOPEZ; MARIA; 12345678Z; 24000001"></textarea>
+    <button class="btn alt" id="csvFileBtn">Elegir archivo CSV</button>
+    <button class="btn" id="csvOk">Añadir a la lista</button>
+    <button class="btn alt" id="csvCancel">Cancelar</button>
+  </div>
+</div>
+
+<input type="file" id="fileSeats" accept="application/pdf,.pdf" hidden>
+
+<div class="sheet" id="seatSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="seatTitle">
+    <h2 id="seatTitle">Coches y asientos</h2>
+    <p class="sub" id="seatSub">Carga el PDF de coches reservados. En cada página debe venir el número de coche y los asientos libres (1A, 1B, 3C…). Las personas de una misma reserva se sientan juntas: A con B o C con D.</p>
+    <div class="groups" id="seatInfo"></div>
+    <div id="seatWarn" class="warn" hidden></div>
+    <button class="btn" id="seatPick">Cargar PDF de coches y asientos</button>
+    <button class="btn alt" id="seatPaste">Escribir o pegar los asientos a mano</button>
+    <div id="seatPasteBox" class="stack" hidden>
+      <p class="sub">Una línea por coche, por ejemplo: <strong>Coche 5: 1A 1B 2C 2D 3A</strong></p>
+      <textarea id="seatText" placeholder="Coche 5: 1A 1B 1C 1D 2A 2B&#10;Coche 6: 3C 3D 4A 4B"></textarea>
+      <button class="btn alt" id="seatTextOk">Leer estos asientos</button>
+    </div>
+    <button class="btn" id="seatAssign" hidden>Repartir asientos</button>
+    <button class="btn alt" id="seatLater">Ahora no, pasar lista sin asientos</button>
+  </div>
+</div>
+
+<div class="sheet" id="doneSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+    <h2 id="doneTitle">Asientos repartidos</h2>
+    <div class="groups" id="doneInfo"></div>
+    <div id="doneWarn" class="warn" hidden></div>
+    <button class="btn" id="doneReport">Informe de asignación de asientos (PDF)</button>
+    <button class="btn alt" id="doneGo">Empezar a pasar lista</button>
+  </div>
+</div>
+
+<div class="sheet" id="moveSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="moveTitle">
+    <h2 id="moveTitle">Cambiar asiento</h2>
+    <p class="sub" id="moveSub"></p>
+    <select id="moveSel" aria-label="Nuevo asiento"></select>
+    <p class="sub">Si eliges un asiento ocupado, las dos personas se intercambian el sitio.</p>
+    <button class="btn" id="moveOk">Cambiar</button>
+    <button class="btn alt" id="moveCancel">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo">Deshacer</button></div>
+
+<script src="lib/pdf.min.js"></script>
+<script src="lib/tesseract.min.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="lib/jspdf.plugin.autotable.min.js"></script>
+<script>
+"use strict";
+const KEY = "asignacion-asientos-v1";
+const $ = id => document.getElementById(id);
+let S = { groups: [], pax: [], coaches: [], seatFile: "" };   // groups:[{label,file}]  pax:[{id,ap,no,tit,doc,loc,g,at,coche,asiento,nj}]  coaches:[{n,seats:["1A",...]}]
+let tab = "pend", lastUndo = null, toastTimer = 0, storageOk = true;
+
+/* ---------- Guardado ---------- */
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOk = true; }catch(e){ storageOk = false; } $("storageWarn").hidden = storageOk || !S.pax.length; }
+function load(){ try{ const t = localStorage.getItem(KEY); if(t){ const d = JSON.parse(t); if(d && Array.isArray(d.pax)){ S = d; if(!Array.isArray(S.coaches)) S.coaches = []; } } }catch(e){} }
+
+/* ---------- Texto ---------- */
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const cap = s => String(s||"").toLowerCase().replace(/(^|[\s-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
+const digits = s => String(s||"").replace(/\D/g,"").replace(/^0+/,"");
+function prep(p){
+  p._tok = norm(p.ap+" "+p.no).split(/[^a-z0-9]+/).filter(Boolean);
+  p._doc = digits(p.doc);
+  p._key = norm(p.ap)+"|"+norm(p.no);
+  return p;
+}
+function sortPax(){ S.pax.sort((a,b)=> a.ap.localeCompare(b.ap,"es") || a.no.localeCompare(b.no,"es")); }
+
+/* ---------- Lectura del PDF (formato listado de pasajeros) ---------- */
+function parseManifest(pages){
+  let label = "", rows = [];
+  for(const items of pages){
+    const find = t => items.find(i => i.str === t);
+    const hT=find("Tit."), hA=find("Apellido"), hN=find("Nombre"), hD=find("DNI"), hO=find("Ocu?");
+    const c = { n: hT?hT.x-25:125, tit: hT?hT.x-8:145, ap: hA?hA.x-20:168, no: hN?hN.x-20:228, dni: hD?hD.x-17:288, end: hO?hO.x-5:328 };
+    if(!label){
+      const tr = items.filter(i => /\b[A-Z]{3}\/[A-Z]{3}\b/.test(i.str) && (!hA || i.y > hA.y + 5)).sort((a,b)=>b.y-a.y)[0];
+      if(tr) label = items.filter(i => Math.abs(i.y-tr.y) < 3 && i.x >= tr.x - 1 && i.x < tr.x + 190)
+                          .sort((a,b)=>a.x-b.x).map(i=>i.str).join(" ").replace(/\s+-\s*\S*$/,"").replace(/\s+/g," ").trim();
+    }
+    const anchors = items.filter(i => /^-?\d{6,10}$/.test(i.str) && i.x < c.n - 30).sort((a,b)=>b.y-a.y);
+    anchors.forEach((a,k) => {
+      const next = anchors[k+1];
+      const r = { loc: a.str.replace(/^-/,""), tit:"", ap:[], no:[], doc:"" };
+      items.filter(i => i !== a && i.y <= a.y + 2 && i.y > a.y - 18 && (!next || i.y > next.y + 2))
+        .sort((p,q)=> (q.y-p.y) || (p.x-q.x))
+        .forEach(i => {
+          if(i.x >= c.tit && i.x < c.ap) r.tit = i.str;
+          else if(i.x >= c.ap && i.x < c.no) r.ap.push(i.str);
+          else if(i.x >= c.no && i.x < c.dni) r.no.push(i.str);
+          else if(i.x >= c.dni && i.x < c.end && !r.doc) r.doc = i.str.split(/\s+/)[0];
+        });
+      if(r.ap.length) rows.push({ loc:r.loc, tit:r.tit, ap:r.ap.join(" ").replace(/\s+/g," ").trim(), no:r.no.join(" ").replace(/\s+/g," ").trim(), doc:r.doc });
+    });
+  }
+  return { label, rows };
+}
+async function pdfToPages(buf){
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  const pages = [];
+  for(let n=1; n<=pdf.numPages; n++){
+    const tc = await (await pdf.getPage(n)).getTextContent();
+    pages.push(tc.items.filter(i => i.str && i.str.trim()).map(i => ({ str: i.str.trim(), x: i.transform[4], y: i.transform[5] })));
+  }
+  return pages;
+}
+const BASE = location.href.replace(/[^/]*([?#].*)?$/, "");
+const NATIVE = !!(window.Android && window.Android.startVoice);
+if(window.pdfjsLib){ try{ pdfjsLib.GlobalWorkerOptions.workerSrc = BASE + "lib/pdf.worker.min.js"; }catch(e){} }
+
+/* ---------- Lectura CSV / texto ---------- */
+function parseCsv(text){
+  const rows = [];
+  text.split(/\r?\n/).forEach(line => {
+    if(!line.trim()) return;
+    const sep = line.includes(";") ? ";" : line.includes("\t") ? "\t" : ",";
+    const f = line.split(sep).map(s => s.trim().replace(/^"|"$/g,""));
+    if(/apellido/i.test(f[0]) && /nombre/i.test(f[1]||"")) return;
+    if(!f[0]) return;
+    rows.push({ ap: f[0].toUpperCase(), no: (f[1]||"").toUpperCase(), doc: (f[2]||"").toUpperCase(), loc: f[3]||"", tit: "" });
+  });
+  return rows;
+}
+
+function addRows(rows, label, file){
+  const g = S.groups.length;
+  S.groups.push({ label: label || file || ("Lista " + (g+1)), file: file || "" });
+  const seen = new Set(S.pax.map(p => p._key + "|" + p._doc));
+  let added = 0;
+  rows.forEach((r,i) => {
+    const p = prep({ id: "g"+g+"-"+i+"-"+Math.random().toString(36).slice(2,7), ap:r.ap, no:r.no, tit:r.tit||"", doc:r.doc||"", loc: r.loc ? g+":"+r.loc : "", g, at:null });
+    const k = p._key + "|" + p._doc;
+    if(seen.has(k)) return;
+    seen.add(k); S.pax.push(p); added++;
+  });
+  if(!added) S.groups.pop();
+  sortPax(); save(); render();
+  return added;
+}
+const gNum = i => "Listado " + (i + 1);
+function groupsInfo(box, suffix){
+  box.textContent = "";
+  S.groups.forEach((gr, i) => {
+    const ps = S.pax.filter(p => p.g === i); if(!ps.length) return;
+    const d = el("div"); d.append(el("span", null, gNum(i) + " · " + gr.label), el("strong", null, ps.filter(p => p.at).length + "/" + ps.length + (suffix || ""))); box.append(d);
+  });
+}
+function askMore(){
+  closeSheets();
+  groupsInfo($("moreInfo"), " personas");
+  $("moreInfo").querySelectorAll("strong").forEach((s, i) => { const n = s.textContent.split("/")[1]; s.textContent = n; });
+  $("moreSheet").hidden = false;
+}
+
+/* ---------- Coches y asientos ---------- */
+// Asiento = número de fila + letra (A B | pasillo | C D). Pareja = A+B o C+D de la misma fila y coche.
+const seatSplit = s => { const m = /^(\d+)([A-D])$/.exec(s); return m ? [+m[1], m[2]] : [999, s]; };
+const seatCmp = (a, b) => { const x = seatSplit(a), y = seatSplit(b); return x[0] - y[0] || (x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0); };
+const MATE = { A: "B", B: "A", C: "D", D: "C" };
+const seatTxt = p => p.asiento ? "Coche " + p.coche + " · " + p.asiento : "Sin asiento";
+const seatCount = () => S.coaches.reduce((a, c) => a + c.seats.length, 0);
+
+function parseSeatText(pageTexts){
+  const coaches = [];
+  const getC = n => { let c = coaches.find(x => x.n === n); if(!c){ c = { n, seats: [] }; coaches.push(c); } return c; };
+  const addSeats = (c, txt) => {
+    for(const m of txt.matchAll(/(?:^|[^0-9A-ZÑ])0*(\d{1,2})\s?-?\s?([ABCD])(?![0-9A-ZÑ])/g)){
+      const id = (+m[1]) + m[2];
+      if(+m[1] > 0 && !c.seats.includes(id)) c.seats.push(id);
+    }
+  };
+  const loose = [];   // páginas con asientos pero sin número de coche
+  pageTexts.forEach((raw, pi) => {
+    const T = norm(raw).toUpperCase();
+    const re = /\b(?:COCHES?|VAGON(?:ES)?|COCHE\s*N)\s*(?:N\s*[O.º°]?\s*)?[:.\-]?\s*0*(\d{1,3})\b/g;
+    let cur = null, last = 0, m, any = false;
+    while((m = re.exec(T))){
+      if(cur) addSeats(cur, T.slice(last, m.index));
+      cur = getC(String(+m[1])); last = re.lastIndex; any = true;
+    }
+    if(cur) addSeats(cur, T.slice(last));
+    if(!any){ const c = { n: "?" + (pi + 1), seats: [] }; addSeats(c, T); if(c.seats.length) loose.push(c); }
+  });
+  const ok = coaches.filter(c => c.seats.length);
+  ok.forEach(c => c.seats.sort(seatCmp));
+  loose.forEach(c => c.seats.sort(seatCmp));
+  return { coaches: ok, loose };
+}
+async function pdfToTexts(buf){
+  const pages = await pdfToPages(buf);
+  return pages.map(items => {
+    const lines = [];
+    items.slice().sort((a, b) => (b.y - a.y) || (a.x - b.x)).forEach(i => {
+      const l = lines.find(x => Math.abs(x.y - i.y) < 2.5);
+      if(l) l.items.push(i); else lines.push({ y: i.y, items: [i] });
+    });
+    return lines.map(l => l.items.sort((a, b) => a.x - b.x).map(i => i.str).join(" ")).join("\n");
+  });
+}
+
+function assignSeats(onlyMissing){
+  if(!onlyMissing) S.pax.forEach(p => { p.coche = ""; p.asiento = ""; });
+  // asientos libres: coche -> fila -> letras
+  const free = new Map();
+  S.coaches.forEach(c => {
+    const rows = new Map();
+    c.seats.forEach(s => { const [r, l] = seatSplit(s); if(!rows.has(r)) rows.set(r, new Set()); rows.get(r).add(l); });
+    free.set(c.n, rows);
+  });
+  const take = (c, r, l) => { const set = free.get(c).get(r); set.delete(l); };
+  S.pax.forEach(p => { if(p.asiento && free.has(p.coche)){ const [r, l] = seatSplit(p.asiento); const set = free.get(p.coche).get(r); if(set) set.delete(l); } });
+  const sortedRows = c => [...free.get(c).entries()].sort((a, b) => a[0] - b[0]);
+  const pairsOf = set => [["A", "B"], ["C", "D"]].filter(([x, y]) => set.has(x) && set.has(y));
+  const put = (p, c, r, l) => { p.coche = c; p.asiento = r + l; take(c, r, l); };
+
+  const todo = S.pax.filter(p => !p.asiento);
+  const by = new Map();
+  todo.forEach(p => { const k = p.loc || ("solo:" + p.id); if(!by.has(k)) by.set(k, []); by.get(k).push(p); });
+  const groups = [...by.values()].filter(g => g.length > 1).sort((a, b) => b.length - a.length);
+  const singles = [...by.values()].filter(g => g.length === 1).map(g => g[0]).sort((a, b) => a.g - b.g);
+
+  groups.forEach(g => {
+    const n = g.length;
+    // 1) 3 o 4 personas en la misma fila (una pareja a cada lado del pasillo)
+    if(n <= 4 && n >= 3){
+      for(const c of free.keys()){
+        for(const [r, set] of sortedRows(c)){
+          const pr = pairsOf(set);
+          if(n === 4 && pr.length === 2){ g.forEach((p, i) => put(p, c, r, "ABCD"[i])); return; }
+          if(n === 3 && pr.length >= 1 && set.size >= 3){
+            const [x, y] = pr[0]; const rest = [...set].filter(l => l !== x && l !== y).sort()[0];
+            put(g[0], c, r, x); put(g[1], c, r, y); put(g[2], c, r, rest); return;
+          }
+        }
+      }
+    }
+    // 2) parejas A-B / C-D en el mismo coche, en las filas más cercanas entre sí
+    const need = Math.ceil(n / 2);
+    let best = null;
+    for(const c of free.keys()){
+      const units = [];
+      sortedRows(c).forEach(([r, set]) => pairsOf(set).forEach(pq => units.push({ c, r, pq })));
+      for(let i = 0; i + need <= units.length; i++){
+        const span = units[i + need - 1].r - units[i].r;
+        if(!best || span < best.span) best = { span, units: units.slice(i, i + need) };
+      }
+    }
+    let units = best ? best.units : null;
+    // 3) no caben en un coche: parejas repartidas en varios coches
+    if(!units){
+      units = [];
+      const cs = [...free.keys()].sort((a, b) => [...free.get(b).values()].reduce((s, x) => s + pairsOf(x).length, 0) - [...free.get(a).values()].reduce((s, x) => s + pairsOf(x).length, 0));
+      for(const c of cs){ for(const [r, set] of sortedRows(c)) for(const pq of pairsOf(set)){ if(units.length < need) units.push({ c, r, pq }); } }
+    }
+    let k = 0;
+    units.forEach(u => u.pq.forEach(l => { if(k < n){ put(g[k], u.c, u.r, l); k++; } }));
+    // 4) ya no quedan parejas libres: asiento suelto lo más cerca posible del resto del grupo
+    for(; k < n; k++){
+      const ref = g.find(p => p.asiento);
+      const opts = [];
+      for(const c of free.keys()) for(const [r, set] of free.get(c)) for(const l of set) opts.push({ c, r, l, d: ref ? (ref.coche === c ? Math.abs(seatSplit(ref.asiento)[0] - r) : 1000) : 0 });
+      if(!opts.length) break;
+      opts.sort((a, b) => a.d - b.d || a.r - b.r);
+      put(g[k], opts[0].c, opts[0].r, opts[0].l);
+    }
+  });
+
+  // personas solas: primero los asientos sueltos (los que no forman pareja), luego el resto
+  const left = [];
+  for(const c of free.keys()) for(const [r, set] of sortedRows(c)) [...set].sort().forEach(l => left.push({ c, r, l, lone: !set.has(MATE[l]) }));
+  left.sort((a, b) => (b.lone - a.lone));
+  singles.forEach(p => { const s = left.shift(); if(s) put(p, s.c, s.r, s.l); });
+  save();
+}
+
+// Una reserva va junta si todos están en el mismo coche y forman parejas A-B / C-D (en grupos impares, uno puede quedar al lado del pasillo)
+function groupOk(g){
+  if(g.length < 2) return true;
+  if(!g.every(p => p.asiento) || new Set(g.map(p => p.coche)).size > 1) return false;
+  const has = new Set(g.map(p => p.asiento));
+  const paired = g.filter(p => { const [r, l] = seatSplit(p.asiento); return has.has(r + MATE[l]); }).length;
+  return paired >= 2 * Math.floor(g.length / 2);
+}
+const apart = p => p.loc && !groupOk([p, ...companions(p)]);
+function seatStats(){
+  const total = S.pax.length, seated = S.pax.filter(p => p.asiento).length;
+  const by = new Map(); S.pax.forEach(p => { if(p.loc){ if(!by.has(p.loc)) by.set(p.loc, []); by.get(p.loc).push(p); } });
+  let groups = 0, together = 0;
+  by.forEach(g => { if(g.length < 2) return; groups++; if(groupOk(g)) together++; });
+  return { total, seated, groups, together, free: seatCount() - seated };
+}
+function coachLines(box, keep){
+  if(!keep) box.textContent = "";
+  S.coaches.forEach(c => {
+    const used = S.pax.filter(p => p.coche === c.n).length;
+    const d = el("div"); d.append(el("span", null, "Coche " + c.n + (c.n.startsWith("?") ? " (sin número)" : "")), el("strong", null, (S.pax.length ? used + " de " : "") + c.seats.length + " asientos")); box.append(d);
+  });
+}
+let pendingSeats = null;
+function openSeatSheet(){
+  closeSheets();
+  pendingSeats = null;
+  $("seatAssign").hidden = true; $("seatWarn").hidden = true; $("seatPasteBox").hidden = true;
+  $("seatInfo").textContent = "";
+  if(S.coaches.length){
+    $("seatSub").textContent = "Coches cargados ahora" + (S.seatFile ? " (" + S.seatFile + ")" : "") + ". Puedes cargar otro PDF para sustituirlos.";
+    coachLines($("seatInfo"));
+  } else {
+    $("seatSub").textContent = "Carga el PDF de coches reservados. En cada página debe venir el número de coche y los asientos libres (1A, 1B, 3C…). Las personas de una misma reserva se sientan juntas: A con B o C con D.";
+  }
+  $("seatLater").textContent = S.coaches.length ? "Cerrar" : "Ahora no, pasar lista sin asientos";
+  $("seatSheet").hidden = false;
+}
+function showParsedSeats(res, file){
+  const coaches = res.coaches.length ? res.coaches : res.loose;
+  const box = $("seatInfo"); box.textContent = "";
+  const w = $("seatWarn");
+  if(!coaches.length){
+    w.textContent = "No he encontrado asientos (tipo 12A, 12B…) en " + (file || "el texto") + ". Si el PDF es una foto escaneada no se puede leer: escribe los asientos a mano.";
+    w.hidden = false; $("seatAssign").hidden = true; return;
+  }
+  pendingSeats = { coaches, file: file || "" };
+  const n = coaches.reduce((a, c) => a + c.seats.length, 0);
+  coaches.forEach(c => { const d = el("div"); d.append(el("span", null, "Coche " + (c.n.startsWith("?") ? "sin número (pág. " + c.n.slice(1) + ")" : c.n)), el("strong", null, c.seats.length + " asientos")); box.append(d); });
+  const t = el("div"); t.append(el("span", null, "Total asientos"), el("strong", null, String(n))); box.append(t);
+  const t2 = el("div"); t2.append(el("span", null, "Viajeros en la lista"), el("strong", null, String(S.pax.length))); box.append(t2);
+  const msgs = [];
+  if(!res.coaches.length) msgs.push("No he encontrado la palabra «Coche» con su número; he puesto un coche por página. Revisa el informe.");
+  if(n < S.pax.length) msgs.push("Faltan " + (S.pax.length - n) + " asientos: " + (S.pax.length - n) + " personas se quedarán sin asiento asignado.");
+  w.textContent = msgs.join(" "); w.hidden = !msgs.length;
+  $("seatSub").textContent = "Esto es lo que he leído. Si está bien, reparte los asientos.";
+  $("seatAssign").hidden = false;
+}
+function showDone(){
+  closeSheets();
+  const st = seatStats(), box = $("doneInfo"); box.textContent = "";
+  const line = (a, b, bad) => { const d = el("div"); d.append(el("span", null, a), el("strong", bad ? "bad" : null, b)); box.append(d); };
+  line("Viajeros con asiento", st.seated + " de " + st.total, st.seated < st.total);
+  if(st.groups) line("Reservas juntas (A-B / C-D)", st.together + " de " + st.groups, st.together < st.groups);
+  line("Asientos que sobran", String(Math.max(0, st.free)));
+  coachLines(box, true);
+  const msgs = [];
+  if(st.seated < st.total) msgs.push((st.total - st.seated) + " personas sin asiento: no hay asientos suficientes en el PDF.");
+  if(st.together < st.groups) msgs.push((st.groups - st.together) + " reservas no han podido ir del todo juntas; salen marcadas en el informe.");
+  $("doneWarn").textContent = msgs.join(" "); $("doneWarn").hidden = !msgs.length;
+  $("doneSheet").hidden = false;
+  render();
+}
+async function handleSeatPdf(f){
+  if(!window.pdfjsLib){ toast("No se pudo preparar el lector de PDF. Cierra la app y vuelve a abrirla."); return; }
+  try{
+    const texts = await pdfToTexts(new Uint8Array(await f.arrayBuffer()));
+    showParsedSeats(parseSeatText(texts), f.name.replace(/\.pdf$/i, ""));
+  }catch(e){ toast("No se pudo leer " + f.name + "."); }
+}
+$("fileSeats").addEventListener("change", ev => { const f = ev.target.files[0]; ev.target.value = ""; if(f) handleSeatPdf(f); });
+$("seatPick").addEventListener("click", () => $("fileSeats").click());
+$("seatPaste").addEventListener("click", () => { $("seatPasteBox").hidden = false; $("seatText").focus(); });
+$("seatTextOk").addEventListener("click", () => showParsedSeats(parseSeatText([$("seatText").value]), "texto escrito"));
+$("seatLater").addEventListener("click", closeSheets);
+$("seatAssign").addEventListener("click", () => {
+  if(!pendingSeats) return;
+  S.coaches = pendingSeats.coaches; S.seatFile = pendingSeats.file;
+  assignSeats(false); showDone();
+});
+$("doneGo").addEventListener("click", closeSheets);
+$("doneReport").addEventListener("click", () => { closeSheets(); $("menuBtn").click(); makePdf("seat"); });
+
+/* Cambiar el asiento de una persona a mano */
+let movePax = null;
+function openMove(p){
+  if(!S.coaches.length){ openSeatSheet(); return; }
+  closeSheets(); movePax = p;
+  $("moveSub").textContent = fullName(p) + " · ahora: " + seatTxt(p);
+  const sel = $("moveSel"); sel.textContent = "";
+  const occ = new Map(S.pax.filter(x => x.asiento).map(x => [x.coche + "|" + x.asiento, x]));
+  S.coaches.forEach(c => {
+    const og = document.createElement("optgroup"); og.label = "Coche " + c.n;
+    c.seats.forEach(s => {
+      const o = occ.get(c.n + "|" + s);
+      const op = el("option", null, s + (o ? (o === p ? " (su asiento)" : " · " + cap(o.no.split(" ")[0]) + " " + cap(o.ap.split(" ")[0])) : " · libre"));
+      op.value = c.n + "|" + s; if(o === p) op.selected = true; og.append(op);
+    });
+    sel.append(og);
+  });
+  const none = el("option", null, "Sin asiento"); none.value = ""; if(!p.asiento) none.selected = true; sel.append(none);
+  $("moveSheet").hidden = false;
+}
+$("moveCancel").addEventListener("click", closeSheets);
+$("moveOk").addEventListener("click", () => {
+  const p = movePax; if(!p) return;
+  const v = $("moveSel").value;
+  if(!v){ p.coche = ""; p.asiento = ""; }
+  else {
+    const [c, s] = v.split("|");
+    const o = S.pax.find(x => x !== p && x.coche === c && x.asiento === s);
+    if(o){ o.coche = p.coche; o.asiento = p.asiento; }
+    p.coche = c; p.asiento = s;
+  }
+  save(); closeSheets(); render([p.id]);
+  toast(fullName(p) + " → " + seatTxt(p));
+});
+$("seatPdfMenu").addEventListener("click", openSeatSheet);
+$("reassign").addEventListener("click", () => {
+  if(!S.coaches.length){ openSeatSheet(); return; }
+  confirmAsk("Se repartirán de nuevo todos los asientos y se perderán los cambios hechos a mano.", "Sí, repartir de nuevo", () => { assignSeats(false); setTimeout(showDone, 0); });
+});
+
+/* ---------- Búsqueda ---------- */
+function lev(a,b){
+  if(Math.abs(a.length-b.length) > 2) return 9;
+  let prev = Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+    const cur=[i];
+    for(let j=1;j<=b.length;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    prev=cur;
+  }
+  return prev[b.length];
+}
+function search(qRaw){
+  let q = norm(qRaw).replace(/(\d)[\s.\-]+(?=\d)/g,"$1");
+  const sm = /^(?:c(?:oche)?\s*(\d{1,3})\s+)?0*(\d{1,2})\s?([abcd])$/.exec(q.trim());
+  if(sm){ const bySeat = S.pax.filter(p => p.asiento === (+sm[2]) + sm[3].toUpperCase() && (!sm[1] || p.coche === String(+sm[1]))); if(bySeat.length) return { list: bySeat, fuzzy:false }; }
+  for(const m of q.matchAll(/[xyz]?\d{6,8}[a-z]/g)){       // DNI/NIE completo (también dentro de un texto escaneado)
+    const d = digits(m[0]);
+    const exact = S.pax.filter(p => p._doc && p._doc === d);
+    if(exact.length) return { list: exact, fuzzy:false };
+  }
+  const toks = q.split(/[^a-z0-9]+/).filter(Boolean).filter(t => !["de","del","la","los","las","y"].includes(t) || q.trim().split(/\s+/).length===1);
+  if(!toks.length) return null;
+  const strict = S.pax.filter(p => toks.every(t => /^\d+$/.test(t) ? (p._doc && p._doc.includes(t.replace(/^0+/,""))) || p.loc.endsWith(t) : p._tok.some(w => w.startsWith(t))));
+  if(strict.length){
+    const whole = strict.filter(p => toks.every(t => /^\d+$/.test(t) || p._tok.includes(t)));
+    return { list: whole.length ? whole : strict, fuzzy:false };
+  }
+  const words = toks.filter(t => t.length >= 4 && !/^\d+$/.test(t));
+  if(!words.length) return { list: [], fuzzy:false };
+  const scored = S.pax.map(p => {
+    let s = 0;
+    words.forEach(t => { const best = Math.min(...p._tok.map(w => lev(t, w.slice(0, Math.max(t.length, w.length))))); if(best <= (t.length >= 7 ? 2 : 1)) s++; });
+    return { p, s };
+  }).filter(o => o.s > 0).sort((a,b)=> b.s-a.s);
+  const top = scored.length ? scored[0].s : 0;
+  return { list: scored.filter(o => o.s === top).map(o => o.p), fuzzy:true };
+}
+
+/* ---------- Marcar ---------- */
+function mark(ids, on){
+  const changed = [];
+  ids.forEach(id => { const p = S.pax.find(x => x.id === id); if(p && (!!p.at) !== on){ p.at = on ? Date.now() : null; changed.push(p); } });
+  if(!changed.length) return;
+  save();
+  if(on && !NATIVE && navigator.vibrate) try{ navigator.vibrate(35); }catch(e){}
+  lastUndo = { ids: changed.map(p => p.id), on };
+  const names = changed.map(p => cap(p.no.split(" ")[0]) + " " + cap(p.ap.split(" ")[0]) + (on && p.asiento ? " → C" + p.coche + " " + p.asiento : "")).join(" y ");
+  toast((on ? "✓ " : "Quitado: ") + names, true);
+  const q = $("q");
+  if(on && q.value){ q.value = ""; $("clear").hidden = true; if(kbdVoice || (!voiceOn && !camOn)) q.focus(); }
+  render(changed.map(p => p.id));
+}
+function toast(msg, undo){
+  $("toastMsg").textContent = msg; $("toastUndo").hidden = !undo; $("toast").hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, 4000);
+}
+$("toastUndo").addEventListener("click", () => {
+  if(!lastUndo) return;
+  const u = lastUndo; lastUndo = null;
+  u.ids.forEach(id => { const p = S.pax.find(x => x.id === id); if(p) p.at = u.on ? null : Date.now(); });
+  save(); $("toast").hidden = true; render();
+});
+
+/* ---------- Pintado ---------- */
+function hhmm(t){ const d = new Date(t); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function companions(p){ return p.loc ? S.pax.filter(x => x.loc === p.loc && x.id !== p.id) : []; }
+function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+
+function render(flashIds){
+  const has = S.pax.length > 0;
+  $("start").hidden = has; $("top").hidden = !has;
+  $("storageWarn").hidden = storageOk || !has;
+  const list = $("list"); list.textContent = "";
+  if(!has) return;
+
+  const total = S.pax.length, ok = S.pax.filter(p => p.at).length;
+  $("count").innerHTML = ""; $("count").append(String(ok)); const sp = el("span", null, "/" + total); $("count").append(sp);
+  $("n-pend").textContent = total - ok; $("n-ok").textContent = ok; $("n-all").textContent = total;
+  const fl = $("flight"); fl.textContent = "";
+  const multiG = S.groups.length > 1;
+  const lbl = multiG ? S.groups.length + " listados a la vez" : (S.groups[0] ? S.groups[0].label : "");
+  const ls = $("lists"); ls.hidden = !multiG; ls.textContent = "";
+  if(multiG) S.groups.forEach((gr, i) => {
+    const ps = S.pax.filter(p => p.g === i); if(!ps.length) return;
+    const d = el("div"); d.append(el("b", null, String(i + 1)), el("span", null, gr.label), el("strong", null, ps.filter(p => p.at).length + "/" + ps.length)); ls.append(d);
+  });
+  fl.append(el("small", null, "Salida en tren" + (S.coaches.length ? " · " + S.coaches.length + " coches" : " · sin asientos")), document.createTextNode(lbl));
+  let bar = fl.querySelector(".bar"); if(!bar){ bar = el("div","bar"); bar.append(el("i")); fl.append(bar); }
+  bar.firstChild.style.width = (total ? ok/total*100 : 0) + "%";
+  ["pend","ok","all"].forEach(t => $("t-"+t).setAttribute("aria-pressed", String(tab === t)));
+
+  const q = $("q").value.trim();
+  let rows, fuzzy = false;
+  if(q){
+    const r = search(q);
+    rows = r ? r.list : []; fuzzy = r && r.fuzzy;
+    if(fuzzy && rows.length) list.append(el("div","note","No hay coincidencia exacta. Parecidos:"));
+    if(!rows.length){ const n = el("div","note"); n.append("Nadie coincide con "); n.append(el("strong",null,"«"+q+"»")); n.append(". Prueba con menos letras o con el segundo apellido."); list.append(n); return; }
+  } else {
+    rows = S.pax.filter(p => tab === "all" || (tab === "ok" ? !!p.at : !p.at));
+    if(tab === "ok") rows = rows.slice().sort((a,b)=> b.at - a.at);
+    if(!rows.length){
+      const e = el("div","empty-ok");
+      if(tab === "pend"){ e.append(el("div","big","Están todos"), el("div","note","Están presentes las " + total + " personas" + (S.groups.length > 1 ? " de los " + S.groups.length + " listados." : " del listado."))); }
+      else e.append(el("div","note","Todavía no hay nadie marcado."));
+      list.append(e); return;
+    }
+  }
+
+  let letter = "";
+  const showGroup = S.groups.length > 1;
+  rows.forEach(p => {
+    if(!q && tab !== "ok"){
+      const L = norm(p.ap).charAt(0).toUpperCase();
+      if(L !== letter){ letter = L; list.append(el("div","letter",L)); }
+    }
+    const row = el("div","row" + (p.at ? " ok" : "")); row.setAttribute("role","button"); row.tabIndex = 0;
+    if(flashIds && flashIds.includes(p.id) && p.at) row.classList.add("flash");
+    const chk = el("div","chk", p.at ? "✓" : "");
+    const who = el("div","who");
+    who.append(el("div","ap",p.ap), el("div","no",cap(p.no)));
+    const comp = companions(p);
+    const meta = [];
+    if(p.at) meta.push("Presente " + hhmm(p.at));
+    if(p.doc) meta.push("Doc. " + p.doc);
+    if(comp.length) meta.push("Con " + comp.map(c => cap(c.no.split(" ")[0]) + " " + cap(c.ap.split(" ")[0]) + (c.asiento ? " (" + (c.coche !== p.coche ? "C" + c.coche + " " : "") + c.asiento + ")" : "") + (c.at ? " ✓" : "")).join(", "));
+    if(S.coaches.length && apart(p)) meta.push("⚠ reserva no sentada junta");
+    if(showGroup) meta.push(gNum(p.g));
+    who.append(el("div","meta",meta.join(" · ")));
+    row.append(chk, who);
+    if(S.coaches.length){
+      const st = el("button", "seat" + (p.asiento ? "" : " none"));
+      st.setAttribute("aria-label", seatTxt(p) + ". Cambiar asiento");
+      if(p.asiento) st.append(el("small", null, "Coche " + p.coche), el("b", null, p.asiento)); else st.append(el("small", null, "Sin"), el("b", null, "asiento"));
+      st.addEventListener("click", ev => { ev.stopPropagation(); openMove(p); });
+      row.append(st);
+    }
+    const pendingInBooking = [p, ...comp].filter(x => !x.at);
+    if(!p.at && pendingInBooking.length >= 2){
+      const b = el("button","pill","Ambos" + (pendingInBooking.length > 2 ? " (" + pendingInBooking.length + ")" : ""));
+      b.addEventListener("click", ev => { ev.stopPropagation(); mark(pendingInBooking.map(x => x.id), true); });
+      row.append(b);
+    }
+    if(p.at){
+      const b = el("button","pill ghost","Quitar");
+      b.addEventListener("click", ev => { ev.stopPropagation(); mark([p.id], false); });
+      row.append(b);
+    }
+    const act = () => { if(!p.at) mark([p.id], true); };
+    row.addEventListener("click", act);
+    row.addEventListener("keydown", ev => { if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); act(); } });
+    list.append(row);
+  });
+}
+
+/* ---------- Entradas ---------- */
+const qEl = $("q");
+qEl.addEventListener("input", () => {
+  $("clear").hidden = !qEl.value; render();
+  clearTimeout(autoTimer); autoTimer = setTimeout(autoMarkFromInput, kbdVoice ? 700 : 1200);
+});
+qEl.addEventListener("keydown", ev => {
+  if(ev.key !== "Enter") return;
+  ev.preventDefault();
+  const r = search(qEl.value.trim()); if(!r) return;
+  const pend = r.list.filter(p => !p.at);
+  if(!r.fuzzy && pend.length === 1) mark([pend[0].id], true);
+  else if(!r.fuzzy && r.list.length === 1 && r.list[0].at) toast("Ya estaba marcado: " + cap(r.list[0].no) + " " + r.list[0].ap);
+});
+$("clear").addEventListener("click", () => { qEl.value = ""; $("clear").hidden = true; render(); qEl.focus(); });
+["pend","ok","all"].forEach(t => $("t-"+t).addEventListener("click", () => { tab = t; render(); }));
+
+let replaceMode = false;
+async function handlePdfs(files){
+  const replace = replaceMode; replaceMode = false;
+  if(!window.pdfjsLib){ toast("No se pudo preparar el lector de PDF. Cierra la app y vuelve a abrirla."); return; }
+  const parsed = [];
+  for(const f of files){
+    try{
+      const pages = await pdfToPages(new Uint8Array(await f.arrayBuffer()));
+      const { label, rows } = parseManifest(pages);
+      if(!rows.length){ toast("No reconozco el formato de " + f.name + ". Usa la opción CSV."); continue; }
+      parsed.push({ label, rows, name: f.name.replace(/\.pdf$/i,"") });
+    }catch(e){ toast("No se pudo leer " + f.name + "."); }
+  }
+  if(!parsed.length) return;
+  if(replace){ S = { groups: [], pax: [], coaches: [], seatFile: "" }; tab = "pend"; $("q").value = ""; $("clear").hidden = true; }
+  let total = 0, dup = 0;
+  parsed.forEach(x => { const n = addRows(x.rows, x.label, x.name); total += n; if(!n) dup++; });
+  if(total) toast(total + " pasajeros cargados" + (dup ? ". Un listado ya estaba cargado y no se ha repetido." : ", ordenados por apellido"));
+  else toast("Ese listado ya estaba cargado. No se ha añadido nada.");
+  if(S.pax.length) askMore(); else closeSheets();
+}
+$("filePdf").addEventListener("change", ev => { const f = [...ev.target.files]; ev.target.value = ""; if(f.length) handlePdfs(f); });
+$("fileCsv").addEventListener("change", async ev => { const f = ev.target.files[0]; ev.target.value = ""; if(f) $("csvText").value = await f.text(); });
+const pickPdf = () => $("filePdf").click();
+const openCsv = () => { closeSheets(); $("csvSheet").hidden = false; };
+$("startPdf").addEventListener("click", pickPdf);
+$("moreYes").addEventListener("click", () => { replaceMode = false; pickPdf(); });
+$("moreCsv").addEventListener("click", openCsv);
+$("moreNo").addEventListener("click", () => {
+  if(!S.coaches.length){ openSeatSheet(); return; }
+  if(S.pax.some(p => !p.asiento)){ assignSeats(true); showDone(); return; }   // listado nuevo: se sienta en los asientos que quedan libres
+  closeSheets();
+});
+$("addPdf").addEventListener("click", pickPdf);
+$("startCsv").addEventListener("click", openCsv);
+$("addCsv").addEventListener("click", openCsv);
+$("csvFileBtn").addEventListener("click", () => $("fileCsv").click());
+$("csvCancel").addEventListener("click", closeSheets);
+$("csvOk").addEventListener("click", () => {
+  const rows = parseCsv($("csvText").value);
+  if(!rows.length){ toast("No hay líneas válidas. Formato: Apellidos; Nombre; Documento; Reserva"); return; }
+  const n = addRows(rows, "", "Lista " + (S.groups.length + 1));
+  $("csvText").value = ""; toast(n ? n + " pasajeros añadidos" : "Esas personas ya estaban en la lista.");
+  if(S.pax.length) askMore(); else closeSheets();
+});
+$("startDemo").addEventListener("click", () => {
+  const demo = [["PEREZ GIL","CARMEN","11111111H","1"],["SANZ ORTEGA","ANTONIO","22222222J","1"],["LLORENS PUIG","AMPARO","33333333P","2"],
+    ["BENAVENT ROS","JOSE LUIS","44444444A","2"],["NAVARRO SOLER","ROSARIO","55555555K","3"],["IBAÑEZ MORA","FRANCISCO","66666666Q","4"],
+    ["ALBERT FERRER","DOLORES","77777777B","4"],["CASTELLO VIDAL","ENRIQUE","88888888Y","5"]]
+    .map(r => ({ ap:r[0], no:r[1], doc:r[2], loc:r[3], tit:"" }));
+  addRows(demo, "EJEMPLO · datos inventados", "ejemplo");
+  S.coaches = [{ n: "5", seats: ["1A","1B","1C","1D","2A","2C","2D","3B"] }, { n: "6", seats: ["4A","4B","5C"] }]; S.seatFile = "ejemplo";
+  assignSeats(false); showDone();
+});
+
+/* Menú */
+function closeSheets(){
+  ["sheet", "csvSheet", "moreSheet", "resumeSheet", "seatSheet", "doneSheet", "moveSheet"].forEach(id => $(id).hidden = true);
+  $("reportBox").hidden = true; $("confirmZone").textContent = "";
+  $("pdfReady").hidden = true; ["pend","ok","all","seat"].forEach(k => $("pdf-" + k).setAttribute("aria-pressed", "false"));
+}
+$("menuBtn").addEventListener("click", () => {
+  groupsInfo($("groups"), "");
+  $("sheet").hidden = false;
+});
+$("closeSheet").addEventListener("click", closeSheets);
+document.querySelectorAll(".sheet").forEach(s => s.addEventListener("click", ev => { if(ev.target === s) closeSheets(); }));
+
+function report(){
+  const now = new Date(), ok = S.pax.filter(p => p.at).length;
+  const lines = ["Control " + hhmm(now) + " — presentes " + ok + " de " + S.pax.length + (S.groups.length > 1 ? " (" + S.groups.length + " listados)" : "")];
+  S.groups.forEach((g, i) => {
+    const ps = S.pax.filter(p => p.g === i); if(!ps.length) return;
+    const miss = ps.filter(p => !p.at);
+    lines.push("", (S.groups.length > 1 ? gNum(i).toUpperCase() + ": " : "") + g.label, "Presentes " + (ps.length - miss.length) + " de " + ps.length);
+    if(miss.length){ lines.push("FALTAN (" + miss.length + "):"); miss.forEach(p => lines.push("- " + p.ap + ", " + cap(p.no) + (p.doc ? " (" + p.doc + ")" : "") + (p.asiento ? " · Coche " + p.coche + " " + p.asiento : ""))); }
+    else lines.push("Están todos.");
+  });
+  return lines.join("\n");
+}
+$("copyReport").addEventListener("click", () => {
+  const t = report(), box = $("reportBox");
+  const fallback = () => { box.value = t; box.hidden = false; box.focus(); box.select(); toast("Selecciona el texto y cópialo"); };
+  if(NATIVE){ try{ Android.copy(t); toast("Resumen copiado. Pégalo en WhatsApp o en un correo."); return; }catch(e){} }
+  try{ navigator.clipboard.writeText(t).then(() => toast("Resumen copiado. Pégalo en WhatsApp o en un correo."), fallback); }catch(e){ fallback(); }
+});
+/* PDF de pendientes / presentes / completo / asignación de asientos */
+let pdfFile = null, pdfB64 = "";
+const pad2 = n => String(n).padStart(2, "0");
+function makePdf(kind){
+  if(!(window.jspdf && window.jspdf.jsPDF)){ toast("No se pudo cargar el generador de PDF. Comprueba la conexión."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  if(typeof doc.autoTable !== "function"){ toast("No se pudo cargar el generador de tablas. Comprueba la conexión."); return; }
+  const now = new Date();
+  const titles = { pend: "Viajeros pendientes", ok: "Viajeros presentes", all: "Listado completo", seat: "Asignación de asientos" };
+  const fileNames = { pend: "Pendientes", ok: "Presentes", all: "Completo", seat: "Asignacion" };
+  const inKind = p => kind === "all" || kind === "seat" || (kind === "ok" ? !!p.at : !p.at);
+  const rows = S.pax.filter(inKind);
+  const withSeats = S.coaches.length > 0;
+  if(kind === "seat" && !withSeats){ toast("Todavía no hay asientos repartidos. Carga el PDF de coches y asientos."); return; }
+  const total = S.pax.length, ok = S.pax.filter(p => p.at).length;
+  const multi = S.groups.length > 1;
+  const fecha = pad2(now.getDate()) + "/" + pad2(now.getMonth() + 1) + "/" + now.getFullYear() + " " + hhmm(now);
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(20);
+  doc.text(titles[kind], 14, 17);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(70);
+  const hl = doc.splitTextToSize(multi ? S.groups.length + " listados: " + S.groups.map((g, i) => (i + 1) + ") " + g.label).join("   ") : S.groups.map(g => g.label).join(""), 182); doc.text(hl, 14, 23); const gy = 23 + hl.length * 4.6;
+  const st = withSeats ? seatStats() : null;
+  doc.text(kind === "seat"
+    ? "Generado el " + fecha + "   ·   Con asiento " + st.seated + " de " + total + (st.groups ? "   ·   Reservas juntas " + st.together + " de " + st.groups : "") + "   ·   Coches: " + S.coaches.map(c => c.n).join(", ")
+    : "Generado el " + fecha + "   ·   Presentes " + ok + " de " + total + "   ·   Faltan " + (total - ok) + "   ·   En este informe: " + rows.length, 14, gy + 1.4);
+
+  const head = kind === "seat" ? ["Nº", "Apellidos", "Nombre", "Reserva", "Coche", "Asiento", "Observación"]
+    : withSeats ? ["Nº", "Apellidos", "Nombre", "Documento", "Reserva", "Coche", "Asiento", "Estado"]
+    : ["Nº", "Apellidos", "Nombre", "Documento", "Reserva", "Estado"];
+  const stateCol = head.length - 1;
+  const sections = S.groups.map((g, i) => ({ i, g, all: S.pax.filter(p => p.g === i) }))
+    .filter(x => x.all.length)
+    .map(x => Object.assign(x, { rows: x.all.filter(inKind) }));
+  let y = gy + 6.4;
+  sections.forEach(sec => {
+    if(multi){
+      if(y > 255){ doc.addPage(); y = 18; }
+      const okG = sec.all.filter(p => p.at).length;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12.5); doc.setTextColor(20);
+      const tl = doc.splitTextToSize(gNum(sec.i) + ": " + sec.g.label, 182);
+      doc.text(tl, 14, y + 4); y += 4 + (tl.length - 1) * 5.5;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(70);
+      doc.text(kind === "seat" ? "Viajeros " + sec.all.length + "   ·   Con asiento " + sec.all.filter(p => p.asiento).length
+        : "Presentes " + okG + " de " + sec.all.length + "   ·   Faltan " + (sec.all.length - okG) + "   ·   En este informe: " + sec.rows.length, 14, y + 9.5);
+      y += 13;
+    }
+    if(!sec.rows.length){
+      doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(20);
+      doc.text(kind === "pend" ? "No falta nadie: están presentes todas las personas." : "Todavía no hay nadie en este listado.", 14, y + 5);
+      y += 14; return;
+    }
+    const obs = p => !p.asiento ? "Sin asiento" : !p.loc || !companions(p).length ? "Viaja solo/a" : apart(p) ? "Reserva NO junta" : "Junto a su reserva";
+    const body = sec.rows.map((p, k) => {
+      const loc = (p.loc || "").split(":").pop();
+      if(kind === "seat") return [String(k + 1), p.ap, cap(p.no), loc, p.coche || "-", p.asiento || "-", obs(p)];
+      const est = p.at ? "Presente " + hhmm(p.at) : "Pendiente";
+      return withSeats ? [String(k + 1), p.ap, cap(p.no), p.doc || "", loc, p.coche || "-", p.asiento || "-", est] : [String(k + 1), p.ap, cap(p.no), p.doc || "", loc, est];
+    });
+    doc.autoTable({
+      startY: y, head: [head], body, theme: "grid",
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 1.7, textColor: 25, lineColor: [200, 204, 198], lineWidth: .2 },
+      headStyles: { fillColor: [255, 199, 44], textColor: 20, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [246, 247, 244] },
+      columnStyles: Object.assign({ 0: { cellWidth: 9, halign: "right" }, 1: { fontStyle: "bold" } },
+        withSeats ? { [head.indexOf("Coche")]: { halign: "center", fontStyle: "bold" }, [head.indexOf("Asiento")]: { halign: "center", fontStyle: "bold", fontSize: 10.5 } } : {}),
+      margin: { left: 14, right: 14, bottom: 16, top: 14 },
+      didParseCell: d => {
+        if(d.section === "body" && d.column.index === stateCol){
+          const p = sec.rows[d.row.index];
+          if(kind === "seat"){
+            const bad = !p.asiento || apart(p);
+            if(bad){ d.cell.styles.fontStyle = "bold"; d.cell.styles.textColor = [179, 38, 30]; }
+          } else {
+            d.cell.styles.fontStyle = "bold";
+            d.cell.styles.textColor = p.at ? [27, 122, 76] : [179, 38, 30];
+          }
+        }
+      }
+    });
+    y = doc.lastAutoTable.finalY + 10;
+  });
+  if(kind === "seat"){
+    // resumen por coche, ordenado por asiento (útil para revisar el coche entero)
+    S.coaches.forEach(c => {
+      const ps = S.pax.filter(p => p.coche === c.n).sort((a, b) => seatCmp(a.asiento, b.asiento));
+      if(y > 250){ doc.addPage(); y = 18; }
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12.5); doc.setTextColor(20);
+      doc.text("Coche " + c.n + "  ·  " + ps.length + " de " + c.seats.length + " asientos ocupados", 14, y + 4);
+      const taken = new Map(ps.map(p => [p.asiento, p]));
+      const body = c.seats.map(s => { const p = taken.get(s); return [s, p ? p.ap : "libre", p ? cap(p.no) : "", p ? (p.loc || "").split(":").pop() : "", p && multi ? String(p.g + 1) : ""]; });
+      doc.autoTable({
+        startY: y + 7, head: [multi ? ["Asiento", "Apellidos", "Nombre", "Reserva", "Listado"] : ["Asiento", "Apellidos", "Nombre", "Reserva", ""]], body, theme: "grid",
+        styles: { font: "helvetica", fontSize: 9, cellPadding: 1.5, textColor: 25, lineColor: [200, 204, 198], lineWidth: .2 },
+        headStyles: { fillColor: [255, 199, 44], textColor: 20, fontStyle: "bold" },
+        columnStyles: { 0: { cellWidth: 18, halign: "center", fontStyle: "bold" }, 1: { fontStyle: "bold" } },
+        margin: { left: 14, right: 14, bottom: 16, top: 14 },
+        didParseCell: d => { if(d.section === "body" && !taken.get(c.seats[d.row.index])) d.cell.styles.textColor = [130, 135, 130]; }
+      });
+      y = doc.lastAutoTable.finalY + 10;
+    });
+  }
+  const pages = doc.getNumberOfPages();
+  for(let i = 1; i <= pages; i++){
+    doc.setPage(i); doc.setFontSize(8); doc.setTextColor(110);
+    doc.text("Contiene datos personales. Uso exclusivo para el servicio contratado.", 14, 290);
+    doc.text("Página " + i + " de " + pages, 196, 290, { align: "right" });
+  }
+  const name = "Asientos_" + fileNames[kind] + "_" + now.getFullYear() + pad2(now.getMonth() + 1) + pad2(now.getDate()) + "-" + pad2(now.getHours()) + pad2(now.getMinutes()) + ".pdf";
+  const blob = doc.output("blob");
+  try{ pdfFile = new File([blob], name, { type: "application/pdf" }); }catch(e){ pdfFile = blob; pdfFile.name = name; }
+  ["pend", "ok", "all", "seat"].forEach(k => $("pdf-" + k).setAttribute("aria-pressed", String(k === kind)));
+  $("pdfName").textContent = name + " · " + rows.length + " personas";
+  pdfB64 = NATIVE ? doc.output("datauristring").split(",")[1] : "";
+  let canShare = NATIVE;
+  if(!NATIVE) try{ canShare = !!(navigator.canShare && navigator.canShare({ files: [pdfFile] })); }catch(e){}
+  $("pdfShare").hidden = !canShare;
+  $("pdfReady").hidden = false;
+}
+["pend", "ok", "all", "seat"].forEach(k => $("pdf-" + k).addEventListener("click", () => makePdf(k)));
+$("pdfShare").addEventListener("click", async () => {
+  if(!pdfFile) return;
+  if(NATIVE){ try{ Android.sharePdf(pdfB64, pdfFile.name); }catch(e){ toast("No se pudo compartir."); } return; }
+  try{ await navigator.share({ files: [pdfFile], title: pdfFile.name }); }
+  catch(e){ if(e && e.name !== "AbortError") toast("No se pudo compartir. Usa «Guardar en el móvil»."); }
+});
+$("pdfSave").addEventListener("click", () => {
+  if(!pdfFile) return;
+  if(NATIVE){ let r = ""; try{ r = Android.savePdf(pdfB64, pdfFile.name); }catch(e){} toast(r || "No se pudo guardar el PDF."); return; }
+  try{
+    const url = URL.createObjectURL(pdfFile), a = document.createElement("a");
+    a.href = url; a.download = pdfFile.name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast("PDF guardado en Descargas");
+  }catch(e){ toast("No se pudo guardar el PDF en este navegador."); }
+});
+
+function confirmAsk(text, label, fn){
+  const z = $("confirmZone"); z.textContent = "";
+  const w = el("div","warn",text); const b = el("button","btn danger",label);
+  b.addEventListener("click", () => { fn(); closeSheets(); });
+  z.append(w, b);
+}
+$("resetMarks").addEventListener("click", () => confirmAsk("Se desmarcará a todas las personas. La lista se mantiene.", "Sí, desmarcar a todos", () => { S.pax.forEach(p => p.at = null); save(); render(); }));
+$("wipe").addEventListener("click", () => confirmAsk("Se borrarán los listados, los asientos y el progreso de este móvil.", "Sí, borrar todo", () => { S = { groups: [], pax: [], coaches: [], seatFile: "" }; save(); tab = "pend"; render(); }));
+
+/* Pantalla encendida mientras se usa */
+let lock = null;
+async function keepAwake(){ try{ if("wakeLock" in navigator && !lock){ lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } }catch(e){} }
+document.addEventListener("click", keepAwake, { once:false, passive:true });
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") keepAwake(); });
+
+/* ---------- Reconocimiento: nombres y documentos ---------- */
+const PART = new Set(["de","del","la","las","los","y","san","da","di"]);
+function nameMatch(text){
+  const words = norm(text).split(/[^a-z0-9]+/).filter(w => w.length >= 2);
+  const ex = t => words.includes(t);
+  const fz = t => words.some(w => t.length >= 5 && Math.abs(w.length - t.length) <= 1 && lev(w, t) <= 1);
+  const has = t => ex(t) || fz(t);
+  const w = (t, hi) => ex(t) ? hi : fz(t) ? hi * .75 : 0;
+  let best = [], top = 0;
+  S.pax.forEach(p => {
+    const ap = norm(p.ap).split(/\s+/).filter(t => t && !PART.has(t));
+    const no = norm(p.no).split(/\s+/).filter(t => t && !PART.has(t));
+    if(!ap.length || !has(ap[0])) return;
+    const sAp = ap.filter(has).length, sNo = no.filter(has).length;
+    if(!(sAp >= 2 || sNo >= 1)) return;           // dos apellidos, o primer apellido + nombre
+    const s = ap.reduce((a, t) => a + w(t, 4), 0) + no.reduce((a, t) => a + w(t, 2), 0);
+    if(s > top){ top = s; best = [p]; } else if(s === top) best.push(p);
+  });
+  return best;
+}
+function docMatch(text){
+  const T = String(text || "").toUpperCase();
+  const variants = [T.replace(/[^A-Z0-9]/g, "")];
+  variants.push(variants[0].replace(/O/g, "0"), variants[0].replace(/O/g, "0").replace(/[IL]/g, "1"));   // letras que el lector confunde con números
+  const found = S.pax.filter(p => {
+    if(!p._doc || p._doc.length < 6) return false;
+    const d8 = p._doc.padStart(8, "0"), up = p.doc.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return variants.some(v => v.includes(d8) || (up.length >= 8 && v.includes(up)) || (/^[XYZ]/.test(up) && v.includes(up.slice(1))));
+  });
+  return found;
+}
+
+/* ---------- Voz y cámara ---------- */
+let voiceOn = false, camOn = false, rec = null, stream = null, track = null, ocr = null, ocrLoading = null, bd = null;
+let camTimer = 0, lastHit = { id: null, t: 0 }, audioCtx = null, torch = false;
+
+function beep(ok){
+  if(NATIVE){ try{ Android.beep(!!ok); }catch(e){} return; }
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = "sine"; o.frequency.value = ok ? 990 : 240; g.gain.value = .18;
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + (ok ? .13 : .3));
+  }catch(e){}
+}
+function setHit(kind, main, sub, actions){
+  $("hit").className = "hit" + (kind ? " " + kind : "");
+  $("hitMain").textContent = main; $("hitSub").textContent = sub || "";
+  $("hit").querySelectorAll(".seatBig").forEach(x => x.remove());
+  const a = $("hitAct"); a.textContent = ""; (actions || []).forEach(b => a.append(b));
+}
+const fullName = p => cap(p.no) + " " + p.ap;
+function accept(p, how, seen){
+  const now = Date.now();
+  if(lastHit.id === p.id && now - lastHit.t < (p.at ? 25000 : 8000)) return true;   // la misma persona sigue delante
+  lastHit = { id: p.id, t: now };
+  if(p.at){ beep(false); setHit("", "Ya estaba marcado: " + fullName(p) + (p.asiento ? " · Coche " + p.coche + " · " + p.asiento : ""), "Presente desde las " + hhmm(p.at)); return true; }
+  mark([p.id], true); beep(true);
+  const acts = companions(p).filter(x => !x.at).map(c => {
+    const b = el("button", "pill", "Marcar también a " + cap(c.no.split(" ")[0]) + " " + cap(c.ap.split(" ")[0]));
+    b.addEventListener("click", () => { mark([c.id], true); b.remove(); });
+    return b;
+  });
+  setHit("good", "✓ " + fullName(p), how + ": «" + seen.replace(/\s+/g, " ").trim().slice(0, 90) + "»", acts);
+  if(p.asiento){ const b = el("div", "seatBig", "Coche " + p.coche + " · Asiento " + p.asiento); $("hitMain").after(b); }
+  else if(S.coaches.length){ $("hitMain").after(el("div", "seatBig", "Sin asiento asignado")); }
+  return true;
+}
+function updateScanner(){
+  $("scanner").hidden = !(voiceOn || camOn || kbdVoice);
+  $("listenBox").hidden = !voiceOn; $("videoBox").hidden = !camOn;
+  $("voiceBtn").setAttribute("aria-pressed", String(voiceOn || kbdVoice));
+  $("voiceBtn").querySelector("span").textContent = kbdVoice ? "Voz (teclado)" : "Voz";
+  $("camBtn").setAttribute("aria-pressed", String(camOn));
+}
+
+/* Voz */
+function handleHeard(alts){
+  for(const t of alts){ const d = docMatch(t); if(d.length === 1) return accept(d[0], "Oído", t); }
+  for(const t of alts){ const m = nameMatch(t); if(m.length === 1) return accept(m[0], "Oído", t); }
+  for(const t of alts){ const r = search(t); if(r && !r.fuzzy && r.list.length === 1) return accept(r.list[0], "Oído", t); }
+  const t = alts[0] || "";
+  const many = nameMatch(t);
+  const r = search(t);
+  const n = many.length > 1 ? many.length : (r ? r.list.length : 0);
+  beep(false);
+  if(n > 1){ $("q").value = t; $("clear").hidden = false; render(); setHit("bad", "Hay " + n + " posibles. Toca a la persona en la lista.", "Oído: «" + t + "»"); }
+  else setHit("bad", "No lo encuentro en el listado", "Oído: «" + t + "». Que lo repita con nombre y dos apellidos.");
+}
+/* Dictado con el micrófono del teclado (cuando Chrome bloquea el micrófono directo) */
+let kbdVoice = false, autoTimer = 0;
+function kbdVoiceOn(reason){
+  voiceStop(); kbdVoice = true; updateScanner();
+  $("scanner").hidden = false;
+  setHit("bad", "Usa el micrófono del teclado",
+    "Chrome no deja escuchar directamente abriendo la app como archivo" + (reason ? " (" + reason + ")" : "") +
+    ". Toca el micrófono del teclado y que cada persona diga nombre y dos apellidos: se marca sola. Con la versión web el micrófono funciona directo.");
+  const q = $("q"); q.value = ""; $("clear").hidden = true; render(); q.focus();
+}
+function autoMarkFromInput(){
+  const t = $("q").value.trim();
+  if(t.length < 5) return;
+  const d = docMatch(t);
+  let p = (d.length === 1) ? d[0] : null;
+  if(!p && t.split(/\s+/).length >= 2){ const m = nameMatch(t); if(m.length === 1) p = m[0]; }
+  if(!p) return;
+  if(p.at){ beep(false); toast("Ya estaba marcado: " + cap(p.no) + " " + p.ap); $("q").value = ""; $("clear").hidden = true; render(); return; }
+  beep(true); mark([p.id], true);
+  if(kbdVoice) setHit("good", "✓ " + fullName(p) + (p.asiento ? " · Coche " + p.coche + " · " + p.asiento : ""), "Dictado: «" + t + "». Sigue con el micrófono del teclado.");
+}
+
+const VOICE_ERR = {
+  "not-allowed": "permiso del micrófono denegado",
+  "service-not-allowed": "el servicio de voz no está permitido aquí",
+  "audio-capture": "no se encuentra el micrófono",
+  "network": "sin conexión con el servicio de voz de Google",
+  "language-not-supported": "idioma no disponible"
+};
+async function voiceStart(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ kbdVoiceOn("este navegador no tiene reconocimiento de voz"); return false; }
+  // pedir antes el permiso del micrófono: en algunos Chrome de Android hace falta para que el reconocimiento arranque
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    try{
+      const st = await navigator.mediaDevices.getUserMedia({ audio: true });
+      st.getTracks().forEach(t => t.stop());
+    }catch(e){
+      if(e && (e.name === "NotAllowedError" || e.name === "SecurityError")){ kbdVoiceOn("permiso del micrófono denegado"); return false; }
+    }
+  }
+  if(!voiceOn) return false;
+  rec = new SR(); rec.lang = "es-ES"; rec.continuous = true; rec.interimResults = false; rec.maxAlternatives = 4;
+  let gotAudio = false;
+  rec.onstart = () => { gotAudio = true; };
+  rec.onresult = ev => {
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const res = ev.results[i]; if(!res.isFinal) continue;
+      const alts = Array.from(res).map(a => a.transcript.trim()).filter(Boolean);
+      if(alts.length) handleHeard(alts);
+    }
+  };
+  rec.onerror = ev => {
+    if(ev.error === "no-speech" || ev.error === "aborted") return;
+    const why = VOICE_ERR[ev.error] || ("error " + ev.error);
+    if(ev.error === "not-allowed" || ev.error === "service-not-allowed" || ev.error === "audio-capture"){ kbdVoiceOn(why); return; }
+    if(ev.error === "network"){ voiceStop(); updateScanner(); $("scanner").hidden = false;
+      setHit("bad", "La voz necesita internet", "El reconocimiento de voz de Chrome usa los servidores de Google. Comprueba los datos móviles y vuelve a pulsar Voz."); return; }
+    setHit("bad", "Problema con la voz", why);
+  };
+  rec.onend = () => { if(voiceOn){ setTimeout(() => { if(voiceOn) try{ rec.start(); }catch(e){} }, 150); } };
+  try{ rec.start(); }catch(e){ kbdVoiceOn("no se pudo iniciar"); return false; }
+  return true;
+}
+function voiceStop(){ voiceOn = false; try{ rec && rec.abort(); }catch(e){} rec = null; }
+/* Voz nativa: el reconocimiento de Android escucha sin parar y manda aqui cada frase */
+window.nativeVoice = function(ev){
+  if(!ev) return;
+  if(ev.t === "ready"){
+    if(voiceOn && !$("hit").classList.contains("good") && !$("hit").classList.contains("bad"))
+      setHit("", "Escuchando…", "Que cada persona diga, cerca del móvil, su nombre y sus dos apellidos.");
+    $("listenText").textContent = "Escuchando. Que digan nombre y apellidos.";
+  } else if(ev.t === "partial"){
+    if(ev.text) $("listenText").textContent = "Oyendo: «" + ev.text + "»";
+  } else if(ev.t === "result"){
+    $("listenText").textContent = "Escuchando. Que digan nombre y apellidos.";
+    if(voiceOn && ev.alts && ev.alts.length) handleHeard(ev.alts);
+  } else if(ev.t === "error"){
+    if(ev.fatal){ voiceOn = false; updateScanner(); $("scanner").hidden = false; }
+    setHit("bad", ev.title || "Problema con la voz", ev.msg || "");
+  } else if(ev.t === "stopped"){
+    voiceOn = false; updateScanner();
+  }
+};
+$("voiceBtn").addEventListener("click", async () => {
+  if(NATIVE){
+    if(voiceOn){ voiceOn = false; try{ Android.stopVoice(); }catch(e){} updateScanner(); return; }
+    voiceOn = true; updateScanner();
+    setHit("", "Arrancando el micrófono…", "Que cada persona diga, cerca del móvil, su nombre y sus dos apellidos.");
+    try{ Android.startVoice(); }catch(e){ voiceOn = false; updateScanner(); }
+    return;
+  }
+  if(voiceOn || kbdVoice){ voiceStop(); kbdVoice = false; updateScanner(); return; }
+  beep(true);  // desbloquea el sonido
+  voiceOn = true; updateScanner();
+  setHit("", "Escuchando…", "Que cada persona diga, cerca del móvil, su nombre y sus dos apellidos.");
+  await voiceStart();
+});
+
+/* Cámara */
+function loadOcr(){
+  if(ocr) return Promise.resolve(ocr);
+  if(ocrLoading) return ocrLoading;
+  if(!window.Tesseract) return Promise.reject(new Error("sin lector"));
+  ocrLoading = Tesseract.createWorker("spa", 1, {
+    workerPath: BASE + "lib/worker.min.js",
+    corePath: BASE + "lib/core",
+    langPath: BASE + "lib/lang",
+    gzip: false,
+    workerBlobURL: false
+  }).then(async w => { await w.setParameters({ tessedit_pageseg_mode: "6" }); ocr = w; return w; })
+    .catch(e => { ocrLoading = null; throw e; });
+  return ocrLoading;
+}
+function grab(v){
+  const vw = v.videoWidth, vh = v.videoHeight, boxA = 16/9;
+  let sx = 0, sy = 0, sw = vw, sh = vh;
+  if(vw / vh > boxA){ sw = vh * boxA; sx = (vw - sw) / 2; } else { sh = vw / boxA; sy = (vh - sh) / 2; }
+  const gx = sx + sw * .06, gy = sy + sh * .12, gw = sw * .88, gh = sh * .76;
+  const k = Math.min(1, 1400 / gw);
+  const c = document.createElement("canvas"); c.width = Math.round(gw * k); c.height = Math.round(gh * k);
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.filter = "grayscale(1) contrast(1.35)";
+  ctx.drawImage(v, gx, gy, gw, gh, 0, 0, c.width, c.height);
+  return c;
+}
+function handleScan(text, how){
+  const d = docMatch(text);
+  if(d.length === 1) return accept(d[0], how, d[0].doc);
+  const m = nameMatch(text);
+  if(m.length === 1) return accept(m[0], how, m[0].ap + " " + m[0].no);
+  return false;
+}
+async function camLoop(){
+  if(!camOn) return;
+  const v = $("video"); let wait = 300;
+  if(v.videoWidth){
+    try{
+      const c = grab(v);
+      let done = false;
+      if(bd){ const codes = await bd.detect(c).catch(() => []); for(const k of codes){ if(handleScan(k.rawValue, "Código")){ done = true; break; } } }
+      if(!done && ocr){
+        const { data } = await ocr.recognize(c);
+        const txt = (data && data.text) || "";
+        if(handleScan(txt, "Leído")) done = true;
+        else if(txt.trim().length > 8 && !$("hit").classList.contains("good")) $("hitSub").textContent = "Leyendo: " + txt.replace(/\s+/g, " ").trim().slice(0, 80);
+      }
+      if(done) wait = 1500;
+    }catch(e){}
+  }
+  camTimer = setTimeout(camLoop, wait);
+}
+async function camStart(){
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
+    setHit("bad", "La cámara no está disponible", "El móvil no deja usar la cámara a la app."); return false;
+  }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
+  }catch(e){
+    setHit("bad", "No tengo permiso para la cámara", "Acepta el permiso. Si lo denegaste: Ajustes > Aplicaciones > Pasalista > Permisos > Cámara."); return false;
+  }
+  const v = $("video"); v.srcObject = stream; try{ await v.play(); }catch(e){}
+  track = stream.getVideoTracks()[0];
+  try{
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    if(caps.focusMode && caps.focusMode.includes("continuous")) await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+    $("torchBtn").hidden = !caps.torch;
+  }catch(e){}
+  try{ if("BarcodeDetector" in window && !bd) bd = new BarcodeDetector(); }catch(e){ bd = null; }
+  if(!ocr){
+    setHit("", "Preparando el lector de documentos…", "Unos segundos, solo la primera vez.");
+    try{ await loadOcr(); }catch(e){ setHit("bad", "No se pudo preparar el lector de documentos", "Cierra la cámara y vuelve a pulsar Cámara."); }
+  }
+  if(!camOn) return true;
+  if(ocr) setHit("", "Enseña el DNI o la tarjeta dentro del recuadro", "Sin reflejos y a un palmo de distancia. Se marca solo.");
+  camLoop();
+  return true;
+}
+function camStop(){
+  camOn = false; clearTimeout(camTimer);
+  try{ stream && stream.getTracks().forEach(t => t.stop()); }catch(e){}
+  stream = null; track = null; torch = false; $("video").srcObject = null;
+}
+$("camBtn").addEventListener("click", async () => {
+  if(camOn){ camStop(); updateScanner(); return; }
+  beep(true);
+  camOn = true; updateScanner();
+  const ok = await camStart();
+  if(!ok){ camStop(); updateScanner(); $("scanner").hidden = false; }
+});
+$("torchBtn").addEventListener("click", async () => {
+  if(!track) return;
+  torch = !torch;
+  try{ await track.applyConstraints({ advanced: [{ torch }] }); }catch(e){ torch = false; }
+  $("torchBtn").textContent = torch ? "Apagar luz" : "Linterna";
+});
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible" && camOn && (!track || track.readyState === "ended")){ camStop(); camOn = true; camStart(); }
+});
+
+/* Boton atras de Android: cierra lo abierto antes de salir */
+window.handleBack = function(){
+  const open = ["csvSheet", "sheet", "resumeSheet", "moreSheet", "seatSheet", "doneSheet", "moveSheet"].find(id => !$(id).hidden);
+  if(open){ closeSheets(); return true; }
+  if($("q").value){ $("q").value = ""; $("clear").hidden = true; render(); return true; }
+  if(camOn){ camStop(); updateScanner(); return true; }
+  if(voiceOn){ $("voiceBtn").click(); return true; }
+  return false;
+};
+
+/* Arranque */
+$("resumeNew").addEventListener("click", () => { replaceMode = true; $("filePdf").click(); });
+$("resumeKeep").addEventListener("click", closeSheets);
+$("resumeAdd").addEventListener("click", () => { replaceMode = false; $("filePdf").click(); });
+
+load(); S.pax.forEach(prep); sortPax();
+try{ localStorage.setItem(KEY+"-t","1"); localStorage.removeItem(KEY+"-t"); }catch(e){ storageOk = false; }
+render();
+if(S.pax.length){
+  groupsInfo($("resumeInfo"), " presentes");
+  if(S.coaches.length){ const d = el("div"); d.append(el("span", null, "Asientos"), el("strong", null, S.pax.filter(p => p.asiento).length + " asignados en " + S.coaches.length + " coches")); $("resumeInfo").append(d); }
+  $("resumeSub").textContent = S.groups.length > 1 ? "Tienes " + S.groups.length + " listados guardados en este móvil:" : "Tienes un listado guardado en este móvil:";
+  $("resumeSheet").hidden = false;
+}
+</script>
+
+</body>
+</html>

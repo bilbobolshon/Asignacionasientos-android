@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'es.fran.asignacionasientos'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'es.fran.asignacionasientos'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    // misma firma en todas las compilaciones: asi se puede actualizar sin desinstalar (y sin perder la lista)
+    signingConfigs {
+        fija {
+            storeFile file('pasalista.keystore')
+            storePassword 'pasalista2026'
+            keyAlias 'pasalista'
+            keyPassword 'pasalista2026'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.fija
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.fija
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    androidResources {
+        noCompress += ['gz', 'wasm']
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.core:core:1.13.1'
+}
