@@ -149,7 +149,7 @@ public class MainActivity extends Activity {
                     i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 }
                 try {
-                    startActivityForResult(Intent.createChooser(i, pdf ? "Elige el listado PDF" : "Elige el archivo"), REQ_FILE);
+                    startActivityForResult(Intent.createChooser(i, pdf ? "Elige los PDF" : "Elige el archivo"), REQ_FILE);
                 } catch (Exception e) {
                     fileCallback.onReceiveValue(null);
                     fileCallback = null;
@@ -597,6 +597,19 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 ui.post(() -> Toast.makeText(MainActivity.this, "No se pudo preparar el PDF", Toast.LENGTH_LONG).show());
             }
+        }
+
+        /** Brillo al máximo mientras se enseña el QR del billete, para que lo lea el lector de la estación. */
+        @JavascriptInterface
+        public void bright(boolean on) {
+            ui.post(() -> {
+                try {
+                    WindowManager.LayoutParams lp = getWindow().getAttributes();
+                    lp.screenBrightness = on ? 1f : WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+                    getWindow().setAttributes(lp);
+                } catch (Exception ignored) {
+                }
+            });
         }
 
         @JavascriptInterface

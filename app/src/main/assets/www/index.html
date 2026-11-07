@@ -58,7 +58,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 /* Lista */
 .list{display:grid;gap:0;margin-top:4px}
 .letter{font-family:var(--display);font-weight:700;font-size:20px;color:var(--muted);padding:12px 4px 4px;border-bottom:1px solid var(--line)}
-.row{display:flex;align-items:center;gap:10px;padding:12px 6px;border-bottom:1px solid var(--line);background:transparent;border-inline:0;border-top:0;text-align:left;width:100%}
+.row{box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:12px 6px;border-bottom:1px solid var(--line);background:transparent;border-inline:0;border-top:0;text-align:left;width:100%}
 .row .who{flex:1;min-width:0}
 .row .ap{font-weight:700;font-size:19px;letter-spacing:.01em;word-break:break-word}
 .row .no{font-size:17px}
@@ -143,6 +143,56 @@ textarea{width:100%;box-sizing:border-box;min-height:120px;font:inherit;font-siz
 .seatBig{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;color:var(--ink)}
 select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
 .groups .bad{color:var(--danger)}
+/* Orden de la lista */
+.sortbar{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
+.sortbar span{flex:none;font-weight:700}
+.sortbar button{flex:1;border:2px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 4px;font-weight:700;font-size:14px;color:var(--ink)}
+.sortbar button[aria-pressed="true"]{background:var(--sign);color:var(--sign-ink);border-color:var(--sign-ink)}
+.row.mate{border-top:0;margin-top:-1px;padding-left:18px;box-shadow:inset 4px 0 0 var(--sign)}
+.row.lead{box-shadow:inset 4px 0 0 var(--sign)}
+.pdfSub{font-size:13px;font-weight:700;color:var(--muted);margin:2px 0 -4px}
+/* Elegir modo */
+.choose{display:grid;gap:12px}
+.choice{display:grid;gap:6px;text-align:left;border:2px solid var(--ink);background:var(--surface);border-radius:12px;padding:16px}
+.choice b{font-family:var(--display);font-size:28px;line-height:1}
+.choice span{font-size:15px;color:var(--muted)}
+.choice.qr{background:var(--sign);color:var(--sign-ink);border-color:var(--sign-ink)}
+.choice.qr span{color:var(--sign-ink);opacity:.8}
+.linkBtn{background:transparent;border:0;color:var(--muted);text-decoration:underline;font-size:15px;padding:6px;justify-self:start}
+/* Billetes */
+.prog{display:grid;gap:6px;font-weight:700}
+.prog .bar2{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.prog .bar2 i{display:block;height:100%;width:0;background:var(--ink);transition:width .2s}
+.okBox{background:var(--ok-bg);border:2px solid var(--ok);color:var(--ok);border-radius:10px;padding:10px 12px;font-weight:700}
+.rvSec{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.rvSec h3{font-family:var(--display);font-size:20px;margin:0}
+.rvItem{border:2px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:8px;background:var(--surface)}
+.rvItem .t{font-weight:700;overflow-wrap:anywhere}
+.rvItem .s{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.rvRow{display:flex;gap:6px;align-items:center}
+.rvRow input{min-width:0;flex:1;font:inherit;font-size:17px;padding:10px;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-transform:uppercase}
+.rvRow .btn{width:auto;flex:none;padding:10px 12px}
+.rvNames{font-size:15px;display:grid;gap:4px}
+/* Pantalla del QR (siempre fondo blanco para que lo lea el lector de la estación) */
+.qrView{position:fixed;inset:0;z-index:25;background:#fff;color:#111;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+.qrView>*{width:100%;max-width:640px;box-sizing:border-box}
+.qrName{font-weight:700;font-size:24px;line-height:1.15;text-align:center;word-break:break-word}
+.qrState{text-align:center;font-weight:700;font-size:16px;border-radius:8px;padding:4px 8px}
+.qrState.ok{background:#DCF0E3;color:#1B7A4C}
+.qrState.was{background:#FFF3CD;color:#7A5A00}
+.qrState.bad{background:#FDE2E0;color:#B3261E}
+.qrSeat{background:#FFC72C;color:#15181A;border-radius:12px;padding:8px 12px;text-align:center;font-family:var(--display);font-weight:700;font-size:40px;line-height:1.05}
+.qrSeat small{display:block;font-family:var(--body);font-size:13px;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.qrSeat.none{background:#FDE2E0;color:#B3261E;font-size:28px}
+.qrImgBox{display:grid;place-items:center;background:#fff}
+.qrImgBox img{width:min(94vw,60vh,600px);height:auto;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.qrImgBox.full img{width:100%;image-rendering:auto}
+.qrMsg{color:#B3261E;font-weight:700;text-align:center}
+.qrMeta{font-size:14px;color:#596164;text-align:center}
+.qrBtns{display:grid;gap:8px}
+.qrBtns .btn{background:#15181A;color:#fff;border-color:#15181A}
+.qrBtns .btn.alt{background:#fff;color:#15181A}
+.qrBtns .pill{background:#fff;color:#15181A;border-color:#15181A;padding:12px;font-size:16px;white-space:normal}
 @media (prefers-reduced-motion:reduce){.listen i{animation:none}}
 @media (prefers-reduced-motion:reduce){.row.flash{animation:none}.bar i{transition:none}}
 </style>
@@ -188,12 +238,30 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
       <button id="t-ok" aria-pressed="false">Presentes <b id="n-ok">0</b></button>
       <button id="t-all" aria-pressed="false">Todos <b id="n-all">0</b></button>
     </div>
+    <div class="sortbar" id="sortBar" role="group" aria-label="Ordenar" hidden>
+      <span>Orden:</span>
+      <button id="s-az" aria-pressed="true">A-Z</button>
+      <button id="s-res" aria-pressed="false">Parejas</button>
+      <button id="s-car" aria-pressed="false">Coches</button>
+    </div>
   </div>
 
   <div id="storageWarn" class="warn" hidden>Este navegador no está guardando el progreso. No cierres ni recargues la página hasta terminar.</div>
 
   <section class="start" id="start" hidden>
-    <h1>Asignación de asientos</h1>
+    <h1>Asientos tren</h1>
+    <div class="choose" id="choose">
+      <p>¿Qué vamos a hacer hoy?</p>
+      <button class="choice" id="chSeats"><b>Repartir asientos</b><span>Tengo el listado y el PDF de coches reservados. La app reparte coche y asiento a cada viajero y después paso lista.</span></button>
+      <button class="choice qr" id="chQr"><b>Pasar lista con QR</b><span>Los billetes ya vienen con viajero, coche y asiento. Cargo el listado y el PDF de cada billete. Al encontrar a cada persona veo su QR en grande para validarlo en la estación.</span></button>
+    </div>
+    <div class="stack" id="startQr" hidden>
+      <p><strong>Pasar lista con QR.</strong> Primero carga el listado de viajeros (puedes añadir varios). Después carga los PDF de los billetes, uno por viajero: la app comprueba que cada persona tiene su billete con coche y asiento y te deja pasar lista enseñando el QR de cada uno.</p>
+      <button class="btn" id="qrStartPdf">Cargar listado PDF</button>
+      <button class="btn alt" id="qrStartCsv">Pegar o cargar lista (CSV / texto)</button>
+      <button class="linkBtn" id="qrBack">← Volver</button>
+    </div>
+    <div class="stack" id="startSeats" hidden>
     <p>Para empezar, carga el listado de viajeros en PDF (puedes añadir varios). Después carga el PDF de coches y asientos reservados: la app reparte los asientos, sienta juntas a las personas de una misma reserva y deja la lista lista para pasar lista. Todo se guarda solo en este móvil.</p>
     <div class="stack">
       <button class="btn" id="startPdf">Cargar listado PDF</button>
@@ -208,7 +276,10 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
         <li><strong>Teclado:</strong> escribe 3 o 4 letras del primer apellido. Si sale una sola persona, pulsa Intro.</li>
         <li>Si viajan en pareja, el botón <strong>Ambos</strong> marca a las dos personas de la reserva.</li>
         <li>Al marcar a alguien, la app enseña en grande su <strong>coche y asiento</strong> para decírselo. Tocando el asiento de una fila puedes cambiarlo o intercambiarlo.</li>
+        <li>Con <strong>Orden</strong> puedes ver la lista por apellido (A-Z), por parejas (cada persona con su reserva) o por coche y asiento.</li>
       </ol>
+    </div>
+    <button class="linkBtn" id="seatsBack">← Volver</button>
     </div>
   </section>
 
@@ -224,7 +295,13 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
     <div class="groups" id="groups"></div>
     <div class="pdfBox">
       <h3>Obtener PDF</h3>
-      <button class="btn alt" id="pdf-seat">Asignación de asientos</button>
+      <div class="pdfSub" id="pdfSeatTitle">Asignación de asientos, ordenada por:</div>
+      <div class="pdfBtns">
+        <button class="btn alt" id="pdf-seat-az">Apellido A-Z</button>
+        <button class="btn alt" id="pdf-seat-res">Parejas</button>
+        <button class="btn alt" id="pdf-seat-car">Coche</button>
+      </div>
+      <div class="pdfSub">Pasar lista:</div>
       <div class="pdfBtns">
         <button class="btn alt" id="pdf-pend">Pendientes</button>
         <button class="btn alt" id="pdf-ok">Presentes</button>
@@ -238,6 +315,8 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
     </div>
     <button class="btn alt" id="copyReport">Copiar resumen en texto (quién falta)</button>
     <textarea id="reportBox" readonly hidden></textarea>
+    <button class="btn alt" id="tkReviewMenu">Revisar billetes</button>
+    <button class="btn alt" id="tkAddMenu">Cargar más billetes PDF</button>
     <button class="btn alt" id="seatPdfMenu">Cargar o cambiar PDF de coches y asientos</button>
     <button class="btn alt" id="reassign">Volver a repartir todos los asientos</button>
     <button class="btn alt" id="addPdf">Añadir otro listado PDF</button>
@@ -257,7 +336,7 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
     <button class="btn" id="resumeNew">Borrar lo anterior y empezar de cero</button>
     <button class="btn alt" id="resumeKeep">Seguir con lo guardado</button>
     <button class="btn alt" id="resumeAdd">Añadir más listados a lo guardado</button>
-    <p class="sub">«Empezar de cero» borra los listados, los asientos y las marcas guardadas, y te pide el PDF nuevo.</p>
+    <p class="sub">«Empezar de cero» borra los listados, los asientos, los billetes y las marcas guardadas, y vuelve a la pantalla de inicio para elegir qué hacer.</p>
   </div>
 </div>
 
@@ -324,22 +403,81 @@ select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;padding:12px
   </div>
 </div>
 
+<input type="file" id="fileTk" accept="application/pdf,.pdf" multiple hidden>
+
+<div class="sheet" id="tkSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="tkTitle">
+    <h2 id="tkTitle">Billetes con QR</h2>
+    <p class="sub" id="tkSub">Carga los PDF de los billetes, uno por viajero (puedes elegirlos todos a la vez). La app busca en cada billete el nombre del viajero, el coche, el asiento y el QR.</p>
+    <div class="prog" id="tkProgBox" hidden><div id="tkProg"></div><div class="bar2"><i id="tkBar"></i></div></div>
+    <button class="btn" id="tkPick">Cargar billetes PDF</button>
+    <button class="btn alt" id="tkLater">Cerrar</button>
+  </div>
+</div>
+
+<div class="sheet" id="reviewSheet" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+    <h2 id="rvTitle">Revisión de billetes</h2>
+    <div class="groups" id="rvInfo"></div>
+    <div id="rvStatus"></div>
+    <div id="rvList" class="stack"></div>
+    <button class="btn" id="rvGo">Empezar a pasar lista</button>
+    <button class="btn alt" id="rvMore">Cargar más billetes PDF</button>
+    <button class="btn alt" id="rvPdf">Informe de billetes (PDF)</button>
+  </div>
+</div>
+
+<div class="qrView" id="qrView" hidden role="dialog" aria-modal="true" aria-labelledby="qrName">
+  <div class="qrName" id="qrName"></div>
+  <div class="qrState" id="qrState"></div>
+  <div class="qrSeat" id="qrSeat"></div>
+  <div class="qrImgBox" id="qrImgBox"><img id="qrImg" alt="QR del billete"></div>
+  <div class="qrMsg" id="qrMsg" hidden></div>
+  <div class="qrMeta" id="qrMeta"></div>
+  <div class="qrBtns" id="qrMates"></div>
+  <div class="qrBtns">
+    <button class="btn" id="qrClose">Siguiente viajero</button>
+    <button class="btn alt" id="qrFull">Ver billete completo</button>
+    <button class="btn alt" id="qrWrong">Este billete no es suyo</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo">Deshacer</button></div>
 
 <script src="lib/pdf.min.js"></script>
 <script src="lib/tesseract.min.js"></script>
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="lib/jspdf.plugin.autotable.min.js"></script>
+<script src="lib/jsqr.min.js"></script>
 <script>
 "use strict";
 const KEY = "asignacion-asientos-v1";
 const $ = id => document.getElementById(id);
-let S = { groups: [], pax: [], coaches: [], seatFile: "" };   // groups:[{label,file}]  pax:[{id,ap,no,tit,doc,loc,g,at,coche,asiento,nj}]  coaches:[{n,seats:["1A",...]}]
-let tab = "pend", lastUndo = null, toastTimer = 0, storageOk = true;
+// mode: "seats" (repartir asientos) o "qr" (billetes ya asignados con su QR)
+// tickets:[{id,file,page,pax,coche,asiento,tren,fecha,hora,code,noQr,dupOf}]  (las imágenes del QR y del billete van en IndexedDB)
+const fresh = mode => ({ mode: mode || "", groups: [], pax: [], coaches: [], seatFile: "", tickets: [], sort: "az" });
+let S = fresh();   // groups:[{label,file}]  pax:[{id,ap,no,tit,doc,loc,g,at,coche,asiento,tk}]  coaches:[{n,seats:["1A",...]}]
+let tab = "pend", lastUndo = null, toastTimer = 0, storageOk = true, tkBusy = false;
+const isQr = () => S.mode === "qr";
+const withSeats = () => S.coaches.length > 0 || isQr();
 
 /* ---------- Guardado ---------- */
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOk = true; }catch(e){ storageOk = false; } $("storageWarn").hidden = storageOk || !S.pax.length; }
-function load(){ try{ const t = localStorage.getItem(KEY); if(t){ const d = JSON.parse(t); if(d && Array.isArray(d.pax)){ S = d; if(!Array.isArray(S.coaches)) S.coaches = []; } } }catch(e){} }
+function load(){ try{ const t = localStorage.getItem(KEY); if(t){ const d = JSON.parse(t); if(d && Array.isArray(d.pax)){ S = Object.assign(fresh(), d); if(!Array.isArray(S.coaches)) S.coaches = []; if(!Array.isArray(S.tickets)) S.tickets = []; if(!S.mode && S.pax.length) S.mode = "seats"; } } }catch(e){} }
+
+/* Imágenes de los billetes (QR recortado y página entera): IndexedDB, que admite mucho más que localStorage */
+let dbP = null;
+function idb(){
+  if(!dbP) dbP = new Promise((res, rej) => {
+    const r = indexedDB.open("asientos-billetes", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("tk");
+    r.onsuccess = () => res(r.result); r.onerror = () => { dbP = null; rej(r.error); };
+  });
+  return dbP;
+}
+async function idbPut(k, v){ const d = await idb(); return new Promise((res, rej) => { const t = d.transaction("tk", "readwrite"); t.objectStore("tk").put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); }); }
+async function idbGet(k){ try{ const d = await idb(); return await new Promise(res => { const r = d.transaction("tk").objectStore("tk").get(k); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }catch(e){ return null; } }
+async function idbClear(){ try{ const d = await idb(); await new Promise(res => { const t = d.transaction("tk", "readwrite"); t.objectStore("tk").clear(); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
 
 /* ---------- Texto ---------- */
 const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -436,13 +574,32 @@ function askMore(){
   closeSheets();
   groupsInfo($("moreInfo"), " personas");
   $("moreInfo").querySelectorAll("strong").forEach((s, i) => { const n = s.textContent.split("/")[1]; s.textContent = n; });
+  $("moreNo").textContent = isQr() ? "No, seguir con los billetes" : "No, seguir con los asientos";
+  $("moreTitle").nextElementSibling.textContent = isQr()
+    ? "Si hoy viaja otro grupo, añade su listado. Todas las personas se juntan en una sola lista para pasar lista, y en los informes salen separadas por listado."
+    : "Si hoy viaja otro grupo en el mismo tren, añade su listado. Todas las personas se juntan en una sola lista para pasar lista y repartir asientos, y en los informes salen separadas por listado.";
   $("moreSheet").hidden = false;
 }
 
 /* ---------- Coches y asientos ---------- */
 // Asiento = número de fila + letra (A B | pasillo | C D). Pareja = A+B o C+D de la misma fila y coche.
-const seatSplit = s => { const m = /^(\d+)([A-D])$/.exec(s); return m ? [+m[1], m[2]] : [999, s]; };
+const seatSplit = s => { const m = /^(\d+)([A-F]?)$/.exec(s || ""); return m ? [+m[1], m[2]] : [999, s || ""]; };
 const seatCmp = (a, b) => { const x = seatSplit(a), y = seatSplit(b); return x[0] - y[0] || (x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0); };
+const coachCmp = (a, b) => { if(!a || !b) return (!a) - (!b); const x = +a, y = +b; return (isNaN(x) || isNaN(y)) ? String(a).localeCompare(String(b), "es", { numeric: true }) : x - y; };
+
+/* Orden de la lista y de los informes: "az" apellido, "res" cada persona con su reserva, "car" coche y asiento */
+const bookingKey = p => p.loc || ("solo:" + p.id);
+function orderRows(rows, ord){
+  ord = ord || S.sort || "az";
+  const az = rows.slice().sort((a, b) => a.ap.localeCompare(b.ap, "es") || a.no.localeCompare(b.no, "es"));
+  if(ord === "res"){
+    const by = new Map();
+    az.forEach(p => { const k = bookingKey(p); if(!by.has(k)) by.set(k, []); by.get(k).push(p); });   // cada reserva sale donde va la primera persona por apellido
+    return [...by.values()].map(g => g.length > 1 && g.every(p => p.asiento) ? g.sort((a, b) => coachCmp(a.coche, b.coche) || seatCmp(a.asiento, b.asiento)) : g).flat();
+  }
+  if(ord === "car") return az.sort((a, b) => coachCmp(a.coche, b.coche) || (a.asiento && b.asiento ? seatCmp(a.asiento, b.asiento) : 0));
+  return az;
+}
 const MATE = { A: "B", B: "A", C: "D", D: "C" };
 const seatTxt = p => p.asiento ? "Coche " + p.coche + " · " + p.asiento : "Sin asiento";
 const seatCount = () => S.coaches.reduce((a, c) => a + c.seats.length, 0);
@@ -568,9 +725,10 @@ function groupOk(g){
   const paired = g.filter(p => { const [r, l] = seatSplit(p.asiento); return has.has(r + MATE[l]); }).length;
   return paired >= 2 * Math.floor(g.length / 2);
 }
-const apart = p => p.loc && !groupOk([p, ...companions(p)]);
+const apart = p => !isQr() && p.loc && !groupOk([p, ...companions(p)]);
 function seatStats(){
   const total = S.pax.length, seated = S.pax.filter(p => p.asiento).length;
+  if(isQr()) return { total, seated, groups: 0, together: 0, free: 0, tickets: S.pax.filter(p => p.tk).length };
   const by = new Map(); S.pax.forEach(p => { if(p.loc){ if(!by.has(p.loc)) by.set(p.loc, []); by.get(p.loc).push(p); } });
   let groups = 0, together = 0;
   by.forEach(g => { if(g.length < 2) return; groups++; if(groupOk(g)) together++; });
@@ -651,11 +809,12 @@ $("seatAssign").addEventListener("click", () => {
   assignSeats(false); showDone();
 });
 $("doneGo").addEventListener("click", closeSheets);
-$("doneReport").addEventListener("click", () => { closeSheets(); $("menuBtn").click(); makePdf("seat"); });
+$("doneReport").addEventListener("click", () => { closeSheets(); $("menuBtn").click(); makePdf("seat-" + (S.sort || "az")); });
 
 /* Cambiar el asiento de una persona a mano */
 let movePax = null;
 function openMove(p){
+  if(isQr()){ showTicket(p, null); return; }
   if(!S.coaches.length){ openSeatSheet(); return; }
   closeSheets(); movePax = p;
   $("moveSub").textContent = fullName(p) + " · ahora: " + seatTxt(p);
@@ -766,7 +925,12 @@ function render(flashIds){
   $("start").hidden = has; $("top").hidden = !has;
   $("storageWarn").hidden = storageOk || !has;
   const list = $("list"); list.textContent = "";
-  if(!has) return;
+  if(!has){
+    $("choose").hidden = !!S.mode; $("startSeats").hidden = S.mode !== "seats"; $("startQr").hidden = S.mode !== "qr";
+    return;
+  }
+  $("sortBar").hidden = !withSeats();
+  ["az", "res", "car"].forEach(o => $("s-" + o).setAttribute("aria-pressed", String((S.sort || "az") === o)));
 
   const total = S.pax.length, ok = S.pax.filter(p => p.at).length;
   $("count").innerHTML = ""; $("count").append(String(ok)); const sp = el("span", null, "/" + total); $("count").append(sp);
@@ -779,7 +943,7 @@ function render(flashIds){
     const ps = S.pax.filter(p => p.g === i); if(!ps.length) return;
     const d = el("div"); d.append(el("b", null, String(i + 1)), el("span", null, gr.label), el("strong", null, ps.filter(p => p.at).length + "/" + ps.length)); ls.append(d);
   });
-  fl.append(el("small", null, "Salida en tren" + (S.coaches.length ? " · " + S.coaches.length + " coches" : " · sin asientos")), document.createTextNode(lbl));
+  fl.append(el("small", null, isQr() ? "Pasar lista con QR · " + S.pax.filter(p => p.tk).length + " billetes" : "Salida en tren" + (S.coaches.length ? " · " + S.coaches.length + " coches" : " · sin asientos")), document.createTextNode(lbl));
   let bar = fl.querySelector(".bar"); if(!bar){ bar = el("div","bar"); bar.append(el("i")); fl.append(bar); }
   bar.firstChild.style.width = (total ? ok/total*100 : 0) + "%";
   ["pend","ok","all"].forEach(t => $("t-"+t).setAttribute("aria-pressed", String(tab === t)));
@@ -794,6 +958,7 @@ function render(flashIds){
   } else {
     rows = S.pax.filter(p => tab === "all" || (tab === "ok" ? !!p.at : !p.at));
     if(tab === "ok") rows = rows.slice().sort((a,b)=> b.at - a.at);
+    else if(withSeats()) rows = orderRows(rows);
     if(!rows.length){
       const e = el("div","empty-ok");
       if(tab === "pend"){ e.append(el("div","big","Están todos"), el("div","note","Están presentes las " + total + " personas" + (S.groups.length > 1 ? " de los " + S.groups.length + " listados." : " del listado."))); }
@@ -802,14 +967,24 @@ function render(flashIds){
     }
   }
 
-  let letter = "";
+  let letter = "", lastKey = null;
   const showGroup = S.groups.length > 1;
-  rows.forEach(p => {
+  const ord = withSeats() ? (S.sort || "az") : "az";
+  rows.forEach((p, i) => {
+    let mate = false, lead = false;
     if(!q && tab !== "ok"){
-      const L = norm(p.ap).charAt(0).toUpperCase();
+      let L;
+      if(ord === "car") L = p.coche ? "Coche " + p.coche : (isQr() ? "Sin billete o sin coche" : "Sin asiento");
+      else if(ord === "res"){
+        const k = bookingKey(p);
+        mate = k === lastKey; lastKey = k;
+        lead = !mate && rows[i + 1] && bookingKey(rows[i + 1]) === k;
+        L = mate ? letter : norm(p.ap).charAt(0).toUpperCase();
+      }
+      else L = norm(p.ap).charAt(0).toUpperCase();
       if(L !== letter){ letter = L; list.append(el("div","letter",L)); }
     }
-    const row = el("div","row" + (p.at ? " ok" : "")); row.setAttribute("role","button"); row.tabIndex = 0;
+    const row = el("div","row" + (p.at ? " ok" : "") + (mate ? " mate" : lead ? " lead" : "")); row.setAttribute("role","button"); row.tabIndex = 0;
     if(flashIds && flashIds.includes(p.id) && p.at) row.classList.add("flash");
     const chk = el("div","chk", p.at ? "✓" : "");
     const who = el("div","who");
@@ -820,13 +995,16 @@ function render(flashIds){
     if(p.doc) meta.push("Doc. " + p.doc);
     if(comp.length) meta.push("Con " + comp.map(c => cap(c.no.split(" ")[0]) + " " + cap(c.ap.split(" ")[0]) + (c.asiento ? " (" + (c.coche !== p.coche ? "C" + c.coche + " " : "") + c.asiento + ")" : "") + (c.at ? " ✓" : "")).join(", "));
     if(S.coaches.length && apart(p)) meta.push("⚠ reserva no sentada junta");
+    if(isQr() && !p.tk) meta.push("⚠ sin billete");
     if(showGroup) meta.push(gNum(p.g));
     who.append(el("div","meta",meta.join(" · ")));
     row.append(chk, who);
-    if(S.coaches.length){
+    if(withSeats()){
       const st = el("button", "seat" + (p.asiento ? "" : " none"));
-      st.setAttribute("aria-label", seatTxt(p) + ". Cambiar asiento");
-      if(p.asiento) st.append(el("small", null, "Coche " + p.coche), el("b", null, p.asiento)); else st.append(el("small", null, "Sin"), el("b", null, "asiento"));
+      st.setAttribute("aria-label", seatTxt(p) + (isQr() ? ". Ver billete" : ". Cambiar asiento"));
+      if(p.asiento) st.append(el("small", null, "Coche " + p.coche), el("b", null, p.asiento));
+      else if(isQr()) st.append(el("small", null, p.tk ? "Billete" : "Sin"), el("b", null, p.tk ? "QR" : "billete"));
+      else st.append(el("small", null, "Sin"), el("b", null, "asiento"));
       st.addEventListener("click", ev => { ev.stopPropagation(); openMove(p); });
       row.append(st);
     }
@@ -841,7 +1019,10 @@ function render(flashIds){
       b.addEventListener("click", ev => { ev.stopPropagation(); mark([p.id], false); });
       row.append(b);
     }
-    const act = () => { if(!p.at) mark([p.id], true); };
+    const act = () => {
+      if(isQr()){ const was = !!p.at; if(!was) mark([p.id], true); showTicket(p, was ? "was" : "ok"); return; }
+      if(!p.at) mark([p.id], true);
+    };
     row.addEventListener("click", act);
     row.addEventListener("keydown", ev => { if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); act(); } });
     list.append(row);
@@ -859,11 +1040,18 @@ qEl.addEventListener("keydown", ev => {
   ev.preventDefault();
   const r = search(qEl.value.trim()); if(!r) return;
   const pend = r.list.filter(p => !p.at);
-  if(!r.fuzzy && pend.length === 1) mark([pend[0].id], true);
-  else if(!r.fuzzy && r.list.length === 1 && r.list[0].at) toast("Ya estaba marcado: " + cap(r.list[0].no) + " " + r.list[0].ap);
+  if(!r.fuzzy && pend.length === 1){ const p = pend[0]; mark([p.id], true); if(isQr()) showTicket(p, "ok"); }
+  else if(!r.fuzzy && r.list.length === 1 && r.list[0].at){ toast("Ya estaba marcado: " + cap(r.list[0].no) + " " + r.list[0].ap); if(isQr()) showTicket(r.list[0], "was"); }
 });
 $("clear").addEventListener("click", () => { qEl.value = ""; $("clear").hidden = true; render(); qEl.focus(); });
 ["pend","ok","all"].forEach(t => $("t-"+t).addEventListener("click", () => { tab = t; render(); }));
+["az","res","car"].forEach(o => $("s-"+o).addEventListener("click", () => { S.sort = o; if(tab === "ok") tab = "all"; save(); render(); }));
+
+/* Pantalla de inicio: elegir qué vamos a hacer */
+$("chSeats").addEventListener("click", () => { S.mode = "seats"; render(); });
+$("chQr").addEventListener("click", () => { S.mode = "qr"; render(); });
+$("seatsBack").addEventListener("click", () => { S.mode = ""; render(); });
+$("qrBack").addEventListener("click", () => { S.mode = ""; render(); });
 
 let replaceMode = false;
 async function handlePdfs(files){
@@ -879,7 +1067,7 @@ async function handlePdfs(files){
     }catch(e){ toast("No se pudo leer " + f.name + "."); }
   }
   if(!parsed.length) return;
-  if(replace){ S = { groups: [], pax: [], coaches: [], seatFile: "" }; tab = "pend"; $("q").value = ""; $("clear").hidden = true; }
+  if(replace){ S = fresh(S.mode); idbClear(); tab = "pend"; $("q").value = ""; $("clear").hidden = true; }
   let total = 0, dup = 0;
   parsed.forEach(x => { const n = addRows(x.rows, x.label, x.name); total += n; if(!n) dup++; });
   if(total) toast(total + " pasajeros cargados" + (dup ? ". Un listado ya estaba cargado y no se ha repetido." : ", ordenados por apellido"));
@@ -891,9 +1079,12 @@ $("fileCsv").addEventListener("change", async ev => { const f = ev.target.files[
 const pickPdf = () => $("filePdf").click();
 const openCsv = () => { closeSheets(); $("csvSheet").hidden = false; };
 $("startPdf").addEventListener("click", pickPdf);
+$("qrStartPdf").addEventListener("click", pickPdf);
+$("qrStartCsv").addEventListener("click", openCsv);
 $("moreYes").addEventListener("click", () => { replaceMode = false; pickPdf(); });
 $("moreCsv").addEventListener("click", openCsv);
 $("moreNo").addEventListener("click", () => {
+  if(isQr()){ if(S.tickets.length){ rematchTickets(); openReview(); } else openTkSheet(); return; }
   if(!S.coaches.length){ openSeatSheet(); return; }
   if(S.pax.some(p => !p.asiento)){ assignSeats(true); showDone(); return; }   // listado nuevo: se sienta en los asientos que quedan libres
   closeSheets();
@@ -921,13 +1112,20 @@ $("startDemo").addEventListener("click", () => {
 });
 
 /* Menú */
+const SHEETS = ["sheet", "csvSheet", "moreSheet", "resumeSheet", "seatSheet", "doneSheet", "moveSheet", "tkSheet", "reviewSheet"];
+const PDFK = ["pend", "ok", "all", "seat-az", "seat-res", "seat-car"];
 function closeSheets(){
-  ["sheet", "csvSheet", "moreSheet", "resumeSheet", "seatSheet", "doneSheet", "moveSheet"].forEach(id => $(id).hidden = true);
+  if(tkBusy && !$("tkSheet").hidden) return;   // no cerrar mientras se leen los billetes
+  SHEETS.forEach(id => $(id).hidden = true);
   $("reportBox").hidden = true; $("confirmZone").textContent = "";
-  $("pdfReady").hidden = true; ["pend","ok","all","seat"].forEach(k => $("pdf-" + k).setAttribute("aria-pressed", "false"));
+  $("pdfReady").hidden = true; PDFK.forEach(k => $("pdf-" + k).setAttribute("aria-pressed", "false"));
 }
 $("menuBtn").addEventListener("click", () => {
   groupsInfo($("groups"), "");
+  const qr = isQr();
+  $("tkReviewMenu").hidden = !qr; $("tkAddMenu").hidden = !qr;
+  $("seatPdfMenu").hidden = qr; $("reassign").hidden = qr;
+  $("pdfSeatTitle").textContent = qr ? "Billetes (coche y asiento), ordenado por:" : "Asignación de asientos, ordenada por:";
   $("sheet").hidden = false;
 });
 $("closeSheet").addEventListener("click", closeSheets);
@@ -954,17 +1152,20 @@ $("copyReport").addEventListener("click", () => {
 /* PDF de pendientes / presentes / completo / asignación de asientos */
 let pdfFile = null, pdfB64 = "";
 const pad2 = n => String(n).padStart(2, "0");
-function makePdf(kind){
+function makePdf(pdfKind){
   if(!(window.jspdf && window.jspdf.jsPDF)){ toast("No se pudo cargar el generador de PDF. Comprueba la conexión."); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   if(typeof doc.autoTable !== "function"){ toast("No se pudo cargar el generador de tablas. Comprueba la conexión."); return; }
   const now = new Date();
-  const titles = { pend: "Viajeros pendientes", ok: "Viajeros presentes", all: "Listado completo", seat: "Asignación de asientos" };
-  const fileNames = { pend: "Pendientes", ok: "Presentes", all: "Completo", seat: "Asignacion" };
+  const kind = pdfKind.startsWith("seat") ? "seat" : pdfKind;
+  const ord = kind === "seat" ? (pdfKind.split("-")[1] || "az") : "az";
+  const ordTxt = { az: "por apellido", res: "por parejas / reserva", car: "por coche y asiento" }[ord];
+  const titles = { pend: "Viajeros pendientes", ok: "Viajeros presentes", all: "Listado completo", seat: (isQr() ? "Billetes: coche y asiento" : "Asignación de asientos") + " (" + ordTxt + ")" };
+  const fileNames = { pend: "Pendientes", ok: "Presentes", all: "Completo", seat: (isQr() ? "Billetes_" : "Asignacion_") + { az: "AZ", res: "Parejas", car: "Coches" }[ord] };
   const inKind = p => kind === "all" || kind === "seat" || (kind === "ok" ? !!p.at : !p.at);
   const rows = S.pax.filter(inKind);
-  const withSeats = S.coaches.length > 0;
+  const withSeats = S.coaches.length > 0 || isQr();
   if(kind === "seat" && !withSeats){ toast("Todavía no hay asientos repartidos. Carga el PDF de coches y asientos."); return; }
   const total = S.pax.length, ok = S.pax.filter(p => p.at).length;
   const multi = S.groups.length > 1;
@@ -976,19 +1177,29 @@ function makePdf(kind){
   const hl = doc.splitTextToSize(multi ? S.groups.length + " listados: " + S.groups.map((g, i) => (i + 1) + ") " + g.label).join("   ") : S.groups.map(g => g.label).join(""), 182); doc.text(hl, 14, 23); const gy = 23 + hl.length * 4.6;
   const st = withSeats ? seatStats() : null;
   doc.text(kind === "seat"
-    ? "Generado el " + fecha + "   ·   Con asiento " + st.seated + " de " + total + (st.groups ? "   ·   Reservas juntas " + st.together + " de " + st.groups : "") + "   ·   Coches: " + S.coaches.map(c => c.n).join(", ")
+    ? (isQr()
+      ? "Generado el " + fecha + "   ·   Con billete " + st.tickets + " de " + total + "   ·   Con coche y asiento " + st.seated + " de " + total
+      : "Generado el " + fecha + "   ·   Con asiento " + st.seated + " de " + total + (st.groups ? "   ·   Reservas juntas " + st.together + " de " + st.groups : "") + "   ·   Coches: " + S.coaches.map(c => c.n).join(", "))
     : "Generado el " + fecha + "   ·   Presentes " + ok + " de " + total + "   ·   Faltan " + (total - ok) + "   ·   En este informe: " + rows.length, 14, gy + 1.4);
 
-  const head = kind === "seat" ? ["Nº", "Apellidos", "Nombre", "Reserva", "Coche", "Asiento", "Observación"]
+  // por coche: una sola tabla con todo el tren (con columna de listado si hay varios)
+  const oneTable = kind === "seat" && ord === "car";
+  const head = kind === "seat"
+    ? (oneTable ? ["Nº", "Coche", "Asiento", "Apellidos", "Nombre", "Reserva"].concat(multi ? ["Listado"] : [], ["Observación"])
+                : ["Nº", "Apellidos", "Nombre", "Reserva", "Coche", "Asiento", "Observación"])
     : withSeats ? ["Nº", "Apellidos", "Nombre", "Documento", "Reserva", "Coche", "Asiento", "Estado"]
     : ["Nº", "Apellidos", "Nombre", "Documento", "Reserva", "Estado"];
   const stateCol = head.length - 1;
-  const sections = S.groups.map((g, i) => ({ i, g, all: S.pax.filter(p => p.g === i) }))
+  const sections = oneTable ? [{ i: -1, g: null, all: S.pax.slice(), rows: orderRows(S.pax, "car") }]
+    : S.groups.map((g, i) => ({ i, g, all: S.pax.filter(p => p.g === i) }))
     .filter(x => x.all.length)
-    .map(x => Object.assign(x, { rows: x.all.filter(inKind) }));
+    .map(x => Object.assign(x, { rows: kind === "seat" ? orderRows(x.all.filter(inKind), ord) : x.all.filter(inKind) }));
   let y = gy + 6.4;
   sections.forEach(sec => {
-    if(multi){
+    // en el orden por parejas, cada reserva lleva el mismo fondo para verla de un vistazo
+    const shade = []; let band = 0, prevK = null;
+    sec.rows.forEach(p => { const k = bookingKey(p); if(prevK !== null && k !== prevK) band++; prevK = k; shade.push(band % 2); });
+    if(multi && !oneTable){
       if(y > 255){ doc.addPage(); y = 18; }
       const okG = sec.all.filter(p => p.at).length;
       doc.setFont("helvetica", "bold"); doc.setFontSize(12.5); doc.setTextColor(20);
@@ -1004,9 +1215,12 @@ function makePdf(kind){
       doc.text(kind === "pend" ? "No falta nadie: están presentes todas las personas." : "Todavía no hay nadie en este listado.", 14, y + 5);
       y += 14; return;
     }
-    const obs = p => !p.asiento ? "Sin asiento" : !p.loc || !companions(p).length ? "Viaja solo/a" : apart(p) ? "Reserva NO junta" : "Junto a su reserva";
+    const obs = p => isQr()
+      ? (!p.tk ? "SIN BILLETE" : !p.asiento ? "Billete sin coche/asiento" : companions(p).length ? "Con " + companions(p).map(c => cap(c.no.split(" ")[0])).join(", ") : "Billete OK")
+      : !p.asiento ? "Sin asiento" : !p.loc || !companions(p).length ? "Viaja solo/a" : apart(p) ? "Reserva NO junta" : "Junto a su reserva";
     const body = sec.rows.map((p, k) => {
       const loc = (p.loc || "").split(":").pop();
+      if(oneTable) return [String(k + 1), p.coche || "-", p.asiento || "-", p.ap, cap(p.no), loc].concat(multi ? [String(p.g + 1)] : [], [obs(p)]);
       if(kind === "seat") return [String(k + 1), p.ap, cap(p.no), loc, p.coche || "-", p.asiento || "-", obs(p)];
       const est = p.at ? "Presente " + hhmm(p.at) : "Pendiente";
       return withSeats ? [String(k + 1), p.ap, cap(p.no), p.doc || "", loc, p.coche || "-", p.asiento || "-", est] : [String(k + 1), p.ap, cap(p.no), p.doc || "", loc, est];
@@ -1015,15 +1229,16 @@ function makePdf(kind){
       startY: y, head: [head], body, theme: "grid",
       styles: { font: "helvetica", fontSize: 9, cellPadding: 1.7, textColor: 25, lineColor: [200, 204, 198], lineWidth: .2 },
       headStyles: { fillColor: [255, 199, 44], textColor: 20, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [246, 247, 244] },
-      columnStyles: Object.assign({ 0: { cellWidth: 9, halign: "right" }, 1: { fontStyle: "bold" } },
+      alternateRowStyles: ord === "res" ? {} : { fillColor: [246, 247, 244] },
+      columnStyles: Object.assign({ 0: { cellWidth: 9, halign: "right" }, [head.indexOf("Apellidos")]: { fontStyle: "bold" } },
         withSeats ? { [head.indexOf("Coche")]: { halign: "center", fontStyle: "bold" }, [head.indexOf("Asiento")]: { halign: "center", fontStyle: "bold", fontSize: 10.5 } } : {}),
       margin: { left: 14, right: 14, bottom: 16, top: 14 },
       didParseCell: d => {
+        if(d.section === "body" && ord === "res") d.cell.styles.fillColor = shade[d.row.index] ? [240, 242, 236] : [255, 255, 255];
         if(d.section === "body" && d.column.index === stateCol){
           const p = sec.rows[d.row.index];
           if(kind === "seat"){
-            const bad = !p.asiento || apart(p);
+            const bad = !p.asiento || apart(p) || (isQr() && !p.tk);
             if(bad){ d.cell.styles.fontStyle = "bold"; d.cell.styles.textColor = [179, 38, 30]; }
           } else {
             d.cell.styles.fontStyle = "bold";
@@ -1034,7 +1249,7 @@ function makePdf(kind){
     });
     y = doc.lastAutoTable.finalY + 10;
   });
-  if(kind === "seat"){
+  if(kind === "seat" && !oneTable && !isQr()){
     // resumen por coche, ordenado por asiento (útil para revisar el coche entero)
     S.coaches.forEach(c => {
       const ps = S.pax.filter(p => p.coche === c.n).sort((a, b) => seatCmp(a.asiento, b.asiento));
@@ -1063,7 +1278,7 @@ function makePdf(kind){
   const name = "Asientos_" + fileNames[kind] + "_" + now.getFullYear() + pad2(now.getMonth() + 1) + pad2(now.getDate()) + "-" + pad2(now.getHours()) + pad2(now.getMinutes()) + ".pdf";
   const blob = doc.output("blob");
   try{ pdfFile = new File([blob], name, { type: "application/pdf" }); }catch(e){ pdfFile = blob; pdfFile.name = name; }
-  ["pend", "ok", "all", "seat"].forEach(k => $("pdf-" + k).setAttribute("aria-pressed", String(k === kind)));
+  PDFK.forEach(k => $("pdf-" + k).setAttribute("aria-pressed", String(k === pdfKind)));
   $("pdfName").textContent = name + " · " + rows.length + " personas";
   pdfB64 = NATIVE ? doc.output("datauristring").split(",")[1] : "";
   let canShare = NATIVE;
@@ -1071,7 +1286,7 @@ function makePdf(kind){
   $("pdfShare").hidden = !canShare;
   $("pdfReady").hidden = false;
 }
-["pend", "ok", "all", "seat"].forEach(k => $("pdf-" + k).addEventListener("click", () => makePdf(k)));
+PDFK.forEach(k => $("pdf-" + k).addEventListener("click", () => makePdf(k)));
 $("pdfShare").addEventListener("click", async () => {
   if(!pdfFile) return;
   if(NATIVE){ try{ Android.sharePdf(pdfB64, pdfFile.name); }catch(e){ toast("No se pudo compartir."); } return; }
@@ -1096,7 +1311,8 @@ function confirmAsk(text, label, fn){
   z.append(w, b);
 }
 $("resetMarks").addEventListener("click", () => confirmAsk("Se desmarcará a todas las personas. La lista se mantiene.", "Sí, desmarcar a todos", () => { S.pax.forEach(p => p.at = null); save(); render(); }));
-$("wipe").addEventListener("click", () => confirmAsk("Se borrarán los listados, los asientos y el progreso de este móvil.", "Sí, borrar todo", () => { S = { groups: [], pax: [], coaches: [], seatFile: "" }; save(); tab = "pend"; render(); }));
+function wipeAll(){ S = fresh(); idbClear(); save(); tab = "pend"; $("q").value = ""; $("clear").hidden = true; closeQr(true); render(); }
+$("wipe").addEventListener("click", () => confirmAsk("Se borrarán los listados, los asientos, los billetes y el progreso de este móvil.", "Sí, borrar todo", wipeAll));
 
 /* Pantalla encendida mientras se usa */
 let lock = null;
@@ -1160,8 +1376,9 @@ function accept(p, how, seen){
   const now = Date.now();
   if(lastHit.id === p.id && now - lastHit.t < (p.at ? 25000 : 8000)) return true;   // la misma persona sigue delante
   lastHit = { id: p.id, t: now };
-  if(p.at){ beep(false); setHit("", "Ya estaba marcado: " + fullName(p) + (p.asiento ? " · Coche " + p.coche + " · " + p.asiento : ""), "Presente desde las " + hhmm(p.at)); return true; }
+  if(p.at){ beep(false); setHit("", "Ya estaba marcado: " + fullName(p) + (p.asiento ? " · Coche " + p.coche + " · " + p.asiento : ""), "Presente desde las " + hhmm(p.at)); if(isQr()) showTicket(p, "was"); return true; }
   mark([p.id], true); beep(true);
+  if(isQr()) showTicket(p, "ok");
   const acts = companions(p).filter(x => !x.at).map(c => {
     const b = el("button", "pill", "Marcar también a " + cap(c.no.split(" ")[0]) + " " + cap(c.ap.split(" ")[0]));
     b.addEventListener("click", () => { mark([c.id], true); b.remove(); });
@@ -1212,6 +1429,7 @@ function autoMarkFromInput(){
   if(!p) return;
   if(p.at){ beep(false); toast("Ya estaba marcado: " + cap(p.no) + " " + p.ap); $("q").value = ""; $("clear").hidden = true; render(); return; }
   beep(true); mark([p.id], true);
+  if(isQr()) showTicket(p, "ok");
   if(kbdVoice) setHit("good", "✓ " + fullName(p) + (p.asiento ? " · Coche " + p.coche + " · " + p.asiento : ""), "Dictado: «" + t + "». Sigue con el micrófono del teclado.");
 }
 
@@ -1320,6 +1538,11 @@ function grab(v){
   return c;
 }
 function handleScan(text, how){
+  if(isQr() && how === "Código"){   // el viajero enseña el QR de su billete en el móvil
+    const t = S.tickets.find(x => x.code && x.code === text && x.pax);
+    const p = t && S.pax.find(x => x.id === t.pax);
+    if(p) return accept(p, "QR del billete", fullName(p));
+  }
   const d = docMatch(text);
   if(d.length === 1) return accept(d[0], how, d[0].doc);
   const m = nameMatch(text);
@@ -1393,10 +1616,349 @@ document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible" && camOn && (!track || track.readyState === "ended")){ camStop(); camOn = true; camStart(); }
 });
 
+/* ==========================================================================
+   PASAR LISTA CON QR: billetes individuales con viajero, coche, asiento y QR
+   ========================================================================== */
+function linesText(items){
+  const lines = [];
+  items.slice().sort((a, b) => (b.y - a.y) || (a.x - b.x)).forEach(i => {
+    const l = lines.find(x => Math.abs(x.y - i.y) < 2.5);
+    if(l) l.items.push(i); else lines.push({ y: i.y, items: [i] });
+  });
+  return lines.map(l => l.items.sort((a, b) => a.x - b.x).map(i => i.str).join(" ")).join("\n");
+}
+// Coche, asiento, tren, fecha y hora del billete (Renfe, Iryo, Ouigo… cada uno lo escribe a su manera)
+function parseTicket(items, text){
+  const T = norm(text).toUpperCase();
+  const SEP = "[ \\t]*(?:N[ \\t]*[O.º°]{1,2})?[ \\t:.\\-]*";
+  let coche = "", asiento = "", m;
+  m = new RegExp("\\b(?:COCHE|VAGON|COACH|CAR|VOITURE)[ \\t]*/[ \\t]*(?:PLAZA|ASIENTO|SEAT|PLACE|BUTACA)" + SEP + "0*(\\d{1,3})[ \\t]*[/\\-][ \\t]*0*(\\d{1,3})[ \\t]*([A-F])?\\b").exec(T);
+  if(m){ coche = String(+m[1]); asiento = (+m[2]) + (m[3] || ""); }
+  if(!coche && (m = new RegExp("\\b(?:COCHE|VAGON|COACH|CAR|VOITURE)" + SEP + "0*(\\d{1,3})\\b").exec(T))) coche = String(+m[1]);
+  if(!asiento && (m = new RegExp("\\b(?:PLAZA|ASIENTO|BUTACA|SEAT|PLACE)" + SEP + "0*(\\d{1,3})[ \\t]?([A-F])?\\b").exec(T))) asiento = (+m[1]) + (m[2] || "");
+  // etiqueta arriba y valor debajo (billetes en forma de tabla)
+  const under = re => {
+    const lab = items.find(i => re.test(norm(i.str).toUpperCase()));
+    if(!lab) return "";
+    const c = items.filter(i => i !== lab && i.y < lab.y - 1 && lab.y - i.y < 48 && Math.abs(i.x - lab.x) < 34 && /^0*\d{1,3}[ ]?[A-F]?$/i.test(i.str))
+      .sort((a, b) => (b.y - a.y) || (Math.abs(a.x - lab.x) - Math.abs(b.x - lab.x)))[0];
+    return c ? c.str.toUpperCase().replace(/\s/g, "") : "";
+  };
+  if(!coche){ const v = under(/^(COCHE|VAGON|COACH|CAR|VOITURE)\b/); if(v) coche = String(+v.replace(/\D/g, "")); }
+  if(!asiento){ const v = under(/^(PLAZA|ASIENTO|BUTACA|SEAT|PLACE)\b/); if(v){ const k = /^0*(\d{1,3})([A-F]?)$/.exec(v); if(k) asiento = (+k[1]) + k[2]; } }
+  const tren = (/\bTREN[ \t]*(?:N[ \t]*[O.º°]{1,2})?[ \t:.]*0*(\d{2,5})\b/.exec(T) || [])[1] || "";
+  const f = /\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/.exec(T);
+  const fecha = f ? pad2(+f[1]) + "/" + pad2(+f[2]) + "/" + f[3] : "";
+  const hora = (/\b([01]?\d|2[0-3])[:.h]([0-5]\d)\b/.exec(T.replace(/\b\d{1,2}[\/.\-]\d{1,2}[\/.\-]20\d{2}\b/g, " ")) || []).slice(1, 3).join(":");
+  return { coche, asiento, tren, fecha, hora };
+}
+// ¿De quién es el billete? Primero el DNI escrito tal cual, luego nombre y apellidos, luego el nombre del archivo
+function matchTicket(text, file){
+  const T = " " + norm(text).toUpperCase().replace(/[^A-Z0-9]+/g, " ") + " ";
+  const T2 = " " + norm(text).toUpperCase().replace(/[^A-Z0-9 \n]/g, "").replace(/\s+/g, " ") + " ";
+  const byDoc = S.pax.filter(p => {
+    const d = (p.doc || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return d.length >= 6 && (T.includes(" " + d + " ") || T2.includes(" " + d + " "));
+  });
+  if(byDoc.length === 1) return byDoc[0];
+  const n = nameMatch(text);
+  if(n.length === 1) return n[0];
+  if(n.length > 1){ const dm = docMatch(text); const both = n.filter(p => dm.includes(p)); if(both.length === 1) return both[0]; }
+  const fn = nameMatch(String(file || "").replace(/[_\-.]+/g, " "));
+  if(fn.length === 1) return fn[0];
+  const d = docMatch(text);
+  return d.length === 1 ? d[0] : null;
+}
+let tkBd = null;
+async function findCode(canvas){
+  try{ if(!tkBd && "BarcodeDetector" in window) tkBd = new BarcodeDetector(); }catch(e){ tkBd = null; }
+  if(tkBd){
+    try{
+      const r = await tkBd.detect(canvas);
+      if(r && r.length){
+        const b = r.slice().sort((a, c) => c.boundingBox.width * c.boundingBox.height - a.boundingBox.width * a.boundingBox.height)[0];
+        return { text: b.rawValue || "", box: { x: b.boundingBox.x, y: b.boundingBox.y, width: b.boundingBox.width, height: b.boundingBox.height } };
+      }
+    }catch(e){}
+  }
+  if(window.jsQR){
+    try{
+      const img = canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, canvas.width, canvas.height);
+      const r = jsQR(img.data, img.width, img.height, { inversionAttempts: "dontInvert" });
+      if(r){
+        const L = r.location, xs = [L.topLeftCorner.x, L.topRightCorner.x, L.bottomLeftCorner.x, L.bottomRightCorner.x], ys = [L.topLeftCorner.y, L.topRightCorner.y, L.bottomLeftCorner.y, L.bottomRightCorner.y];
+        const x = Math.min(...xs), y = Math.min(...ys);
+        return { text: r.data || "", box: { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y } };
+      }
+    }catch(e){}
+  }
+  return null;
+}
+async function renderPage(page, scale){
+  const vp = page.getViewport({ scale });
+  const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+  const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  return c;
+}
+// recorta el QR volviendo a dibujar solo esa zona del PDF con mucho detalle (queda nítido en grande)
+async function cropCode(page, box, sc){
+  const m = Math.max(box.width, box.height) * .18;   // margen blanco ~4 módulos, lo que piden los lectores
+  const x = (box.x - m) / sc, y = (box.y - m) / sc, w = (box.width + 2 * m) / sc, h = (box.height + 2 * m) / sc;
+  const s = Math.min(12, 900 / Math.max(w, h));
+  const vp = page.getViewport({ scale: s, offsetX: -x * s, offsetY: -y * s });
+  const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  return c.toDataURL("image/png");
+}
+async function readTicketPage(page){
+  const tc = await page.getTextContent();
+  const items = tc.items.filter(i => i.str && i.str.trim()).map(i => ({ str: i.str.trim(), x: i.transform[4], y: i.transform[5] }));
+  const text = linesText(items);
+  const c = await renderPage(page, 1.6);
+  let sc = 1.6, code = await findCode(c);
+  if(!code){ const c2 = await renderPage(page, 3); code = await findCode(c2); sc = 3; c2.width = c2.height = 0; }
+  const qr = code ? await cropCode(page, code.box, sc) : "";
+  const pageImg = c.toDataURL("image/jpeg", .72);
+  c.width = c.height = 0;
+  return { items, text, code, qr, pageImg };
+}
+const ticketOf = p => p && p.tk ? S.tickets.find(t => t.id === p.tk) || null : null;
+function setTicket(p, t){
+  S.pax.forEach(x => { if(x !== p && x.tk === t.id){ x.tk = ""; x.coche = ""; x.asiento = ""; } });
+  const old = ticketOf(p); if(old && old !== t) old.pax = null;
+  p.tk = t.id; t.pax = p.id; t.dupOf = "";
+  p.coche = t.coche || ""; p.asiento = t.asiento || "";
+}
+function unsetTicket(t){
+  const p = S.pax.find(x => x.id === t.pax);
+  if(p){ p.tk = ""; p.coche = ""; p.asiento = ""; }
+  t.pax = null;
+}
+function linkTicket(t){
+  const p = matchTicket(t.txt || "", t.file);
+  if(!p) return;
+  if(ticketOf(p) && p.tk !== t.id){ t.dupOf = p.id; return; }   // esta persona ya tiene otro billete
+  setTicket(p, t);
+}
+function rematchTickets(){ S.tickets.filter(t => !t.pax).forEach(t => { t.dupOf = ""; linkTicket(t); }); save(); }
+
+function tkProgress(txt, frac){ $("tkProgBox").hidden = false; $("tkProg").textContent = txt; $("tkBar").style.width = Math.round(frac * 100) + "%"; }
+async function processTicketFiles(files){
+  if(!window.pdfjsLib){ toast("No se pudo preparar el lector de PDF. Cierra la app y vuelve a abrirla."); return; }
+  tkBusy = true; $("tkPick").hidden = true; $("tkLater").hidden = true;
+  $("tkSub").textContent = "Leyendo los billetes. Puede tardar un poco (unos segundos por billete): no cierres la app.";
+  let added = 0, dup = 0, bad = 0, noCode = 0;
+  for(let k = 0; k < files.length; k++){
+    const f = files[k];
+    tkProgress("Billete " + (k + 1) + " de " + files.length + " · " + f.name, k / files.length);
+    let pdf = null;
+    try{
+      pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise;
+      const found = []; let first = null;
+      for(let n = 1; n <= Math.min(pdf.numPages, 30); n++){
+        const page = await pdf.getPage(n);
+        const r = await readTicketPage(page);
+        if(r.code) found.push({ r, n }); else if(n === 1) first = { r, n };
+        else r.pageImg = "";
+        page.cleanup();
+      }
+      if(!found.length && first) found.push(first);     // billete sin código legible: se guarda la página entera
+      for(const { r, n } of found){
+        if(r.code && r.code.text && S.tickets.some(t => t.code === r.code.text)){ dup++; continue; }
+        const t = Object.assign({ id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), file: f.name.replace(/\.pdf$/i, ""), page: n, pages: pdf.numPages,
+          code: r.code ? r.code.text : "", noQr: !r.code, txt: r.text.slice(0, 2500), pax: null, dupOf: "" }, parseTicket(r.items, r.text));
+        await idbPut(t.id, { qr: r.qr, page: r.pageImg });
+        S.tickets.push(t); added++; if(t.noQr) noCode++;
+        linkTicket(t);
+      }
+    }catch(e){ bad++; }
+    try{ pdf && await pdf.destroy(); }catch(e){}
+    save();
+    await new Promise(res => setTimeout(res, 0));
+  }
+  tkProgress("Listo", 1);
+  tkBusy = false;
+  const msg = [added + " billetes leídos"];
+  if(dup) msg.push(dup + " repetidos (ya estaban cargados)");
+  if(bad) msg.push(bad + " archivos que no se han podido abrir");
+  if(noCode) msg.push(noCode + " sin QR localizado");
+  render();
+  openReview(msg.join(" · ") + ".");
+}
+function openTkSheet(){
+  closeSheets();
+  $("tkProgBox").hidden = true; $("tkPick").hidden = false; $("tkLater").hidden = false;
+  $("tkSub").textContent = (S.tickets.length ? "Ya hay " + S.tickets.length + " billetes cargados; puedes añadir más (los repetidos no se duplican). " : "") +
+    "Carga los PDF de los billetes, uno por viajero (puedes elegirlos todos a la vez). La app busca en cada billete el nombre del viajero, el coche, el asiento y el QR.";
+  $("tkLater").textContent = S.tickets.length ? "Ir a la revisión" : "Ahora no";
+  $("tkSheet").hidden = false;
+}
+$("tkPick").addEventListener("click", () => $("fileTk").click());
+$("fileTk").addEventListener("change", ev => { const f = [...ev.target.files]; ev.target.value = ""; if(f.length) processTicketFiles(f); });
+$("tkLater").addEventListener("click", () => { if(S.tickets.length) openReview(); else closeSheets(); });
+$("tkAddMenu").addEventListener("click", openTkSheet);
+$("tkReviewMenu").addEventListener("click", () => openReview());
+$("rvMore").addEventListener("click", openTkSheet);
+$("rvGo").addEventListener("click", closeSheets);
+$("rvPdf").addEventListener("click", () => { closeSheets(); $("menuBtn").click(); makePdf("seat-" + (S.sort || "az")); });
+
+/* Revisión: que todos tengan billete con coche y asiento antes de empezar */
+const shortName = p => cap(p.no.split(" ")[0]) + " " + cap(p.ap);
+function openReview(note){
+  closeSheets();
+  const info = $("rvInfo"); info.textContent = "";
+  const line = (a, b, bad) => { const d = el("div"); d.append(el("span", null, a), el("strong", bad ? "bad" : null, String(b))); info.append(d); };
+  const total = S.pax.length, withT = S.pax.filter(p => ticketOf(p)), seated = withT.filter(p => p.coche && p.asiento);
+  const orphan = S.tickets.filter(t => !t.pax);
+  const noSeat = withT.filter(p => !(p.coche && p.asiento));
+  const noQr = withT.filter(p => ticketOf(p).noQr);
+  const without = orderRows(S.pax.filter(p => !ticketOf(p)), "az");
+  line("Viajeros en el listado", total);
+  line("Con billete", withT.length + " de " + total, withT.length < total);
+  line("Con coche y asiento", seated.length + " de " + total, seated.length < total);
+  line("Billetes cargados", S.tickets.length);
+  if(orphan.length) line("Billetes sin identificar", orphan.length, true);
+  if(noQr.length) line("Billetes sin QR localizado", noQr.length, true);
+  const allOk = total > 0 && seated.length === total && !orphan.length && !noQr.length;
+  const stBox = $("rvStatus"); stBox.textContent = "";
+  if(note) stBox.append(el("p", "sub", note));
+  stBox.append(allOk ? el("div", "okBox", "✓ Todo correcto: los " + total + " viajeros tienen su billete con coche, asiento y QR.")
+                     : el("div", "warn", "Revisa lo que sale abajo. Puedes corregirlo aquí o empezar igualmente."));
+  const L = $("rvList"); L.textContent = "";
+  const sec = (title) => { const s = el("div", "rvSec"); s.append(el("h3", null, title)); L.append(s); return s; };
+  const btn = (txt, cls, fn) => { const b = el("button", "btn " + (cls || ""), txt); b.addEventListener("click", fn); return b; };
+
+  if(orphan.length){
+    const s = sec("Billetes sin identificar (" + orphan.length + ")");
+    orphan.forEach(t => {
+      const it = el("div", "rvItem");
+      it.append(el("div", "t", t.file + (t.pages > 1 ? " · pág. " + t.page : "")));
+      const dupP = t.dupOf && S.pax.find(x => x.id === t.dupOf);
+      it.append(el("div", "s", (t.coche || t.asiento ? "Coche " + (t.coche || "?") + " · Asiento " + (t.asiento || "?") + ". " : "") +
+        (dupP ? "Parece de " + shortName(dupP) + ", que ya tiene otro billete (¿repetido, o de la vuelta?)." : "No encuentro en el listado el nombre que pone este billete.")));
+      const sel = document.createElement("select"); sel.setAttribute("aria-label", "Viajero de este billete");
+      sel.append(Object.assign(el("option", null, "¿De quién es este billete?"), { value: "" }));
+      const og1 = document.createElement("optgroup"); og1.label = "Sin billete";
+      without.forEach(p => og1.append(Object.assign(el("option", null, p.ap + ", " + cap(p.no)), { value: p.id })));
+      const og2 = document.createElement("optgroup"); og2.label = "Ya tienen billete (se le cambia)";
+      orderRows(withT, "az").forEach(p => og2.append(Object.assign(el("option", null, p.ap + ", " + cap(p.no)), { value: p.id })));
+      if(without.length) sel.append(og1); sel.append(og2);
+      if(dupP) sel.value = "";
+      const row = el("div", "rvRow"); row.style.display = "grid"; row.style.gap = "6px";
+      row.append(sel, btn("Asignar a esta persona", "", () => {
+        const p = S.pax.find(x => x.id === sel.value); if(!p){ toast("Elige primero a la persona."); return; }
+        setTicket(p, t); save(); render(); openReview(); toast("Billete asignado a " + shortName(p));
+      }));
+      const r2 = el("div", "rvRow");
+      r2.append(btn("Ver billete", "alt", () => showTicket(null, "", t, "review")),
+                btn("Descartar", "danger", () => { S.tickets = S.tickets.filter(x => x !== t); save(); openReview(); }));
+      it.append(row, r2); s.append(it);
+    });
+  }
+  if(without.length){
+    const s = sec("Viajeros sin billete (" + without.length + ")");
+    const n = el("div", "rvNames");
+    without.forEach(p => n.append(el("div", null, "• " + p.ap + ", " + cap(p.no) + (S.groups.length > 1 ? " · " + gNum(p.g) : ""))));
+    s.append(n);
+  }
+  if(noSeat.length){
+    const s = sec("Billetes sin coche o asiento (" + noSeat.length + ")");
+    s.append(el("p", "sub", "No he sabido leer el coche o el asiento. Míralo en el billete y escríbelo."));
+    noSeat.forEach(p => {
+      const t = ticketOf(p), it = el("div", "rvItem");
+      it.append(el("div", "t", p.ap + ", " + cap(p.no)), el("div", "s", t.file));
+      const ic = Object.assign(document.createElement("input"), { value: p.coche || "", placeholder: "Coche", inputMode: "numeric" });
+      const ia = Object.assign(document.createElement("input"), { value: p.asiento || "", placeholder: "Asiento" });
+      const row = el("div", "rvRow"); row.append(ic, ia);
+      const r2 = el("div", "rvRow");
+      r2.append(btn("Guardar", "", () => {
+        const c = ic.value.trim().replace(/^0+(?=\d)/, ""), a = ia.value.trim().toUpperCase().replace(/\s/g, "").replace(/^0+(?=\d)/, "");
+        if(!c || !a){ toast("Escribe el coche y el asiento."); return; }
+        t.coche = c; t.asiento = a; p.coche = c; p.asiento = a; save(); render(); openReview();
+      }), btn("Ver billete", "alt", () => showTicket(p, "", t, "review")));
+      it.append(row, r2); s.append(it);
+    });
+  }
+  if(noQr.length){
+    const s = sec("Billetes sin QR localizado (" + noQr.length + ")");
+    s.append(el("p", "sub", "No he encontrado el código en estos billetes (puede ser un PDF escaneado o un código de otro tipo). Al pasar lista se enseñará el billete entero."));
+    noQr.forEach(p => { const it = el("div", "rvItem"); it.append(el("div", "t", p.ap + ", " + cap(p.no)), btn("Ver billete", "alt", () => showTicket(p, "", null, "review"))); s.append(it); });
+  }
+  $("rvGo").textContent = allOk ? "Empezar a pasar lista" : "Empezar a pasar lista igualmente";
+  $("reviewSheet").hidden = false;
+}
+
+/* Pantalla del billete: viajero, coche y asiento y el QR en grande */
+let qrCur = null, qrSeq = 0, qrReturn = "";
+function bright(on){ if(NATIVE){ try{ Android.bright(!!on); }catch(e){} } }
+function setQrImg(src, full){
+  const img = $("qrImg");
+  if(src) img.src = src; else img.removeAttribute("src");
+  $("qrImgBox").hidden = !src;
+  $("qrImgBox").classList.toggle("full", !!full);
+}
+async function showTicket(p, state, t, from){
+  t = t || ticketOf(p);
+  const seq = ++qrSeq;
+  qrCur = { p, t, full: false, data: null }; qrReturn = from || "";
+  if(from) SHEETS.forEach(id => $(id).hidden = true);
+  $("qrName").textContent = p ? fullName(p) : "Billete: " + t.file;
+  const st = $("qrState");
+  st.className = "qrState " + (state === "ok" ? "ok" : state === "was" ? "was" : "");
+  st.textContent = state === "ok" ? "✓ Presente · " + hhmm(p.at || Date.now()) : state === "was" ? "Ya estaba presente desde las " + hhmm(p.at) : "";
+  st.hidden = !state;
+  const co = (p && p.coche) || (t && t.coche) || "", as = (p && p.asiento) || (t && t.asiento) || "";
+  const seat = $("qrSeat"); seat.textContent = "";
+  if(co || as){ seat.className = "qrSeat"; seat.append(el("small", null, "Coche · Asiento"), document.createTextNode((co ? "Coche " + co : "Coche ?") + "  ·  " + (as || "?"))); }
+  else { seat.className = "qrSeat none"; seat.textContent = t ? "Coche y asiento sin leer" : "SIN BILLETE"; }
+  $("qrMeta").textContent = t ? [t.tren ? "Tren " + t.tren : "", t.fecha, t.hora, p && p.doc ? "Doc. " + p.doc : ""].filter(Boolean).join(" · ") : (p && p.doc ? "Doc. " + p.doc : "");
+  const mates = $("qrMates"); mates.textContent = "";
+  if(p && !from) companions(p).forEach(c => {
+    const b = el("button", "pill", (c.at ? "✓ " : "") + "Ver el QR de " + shortName(c) + (c.asiento ? "  (C" + c.coche + " · " + c.asiento + ")" : ""));
+    b.addEventListener("click", () => { const was = !!c.at; if(!was) mark([c.id], true); showTicket(c, was ? "was" : "ok"); });
+    mates.append(b);
+  });
+  $("qrFull").hidden = !t; $("qrFull").textContent = "Ver billete completo";
+  $("qrWrong").hidden = !(p && t);
+  $("qrClose").textContent = from ? "Volver a la revisión" : "Siguiente viajero";
+  const msg = $("qrMsg"); msg.hidden = true;
+  setQrImg("", false);
+  $("qrView").hidden = false; $("qrView").scrollTop = 0; bright(true);
+  if(!t){ msg.textContent = "Esta persona no tiene billete cargado. Puedes cargarlo en Menú > Cargar más billetes PDF."; msg.hidden = false; return; }
+  const data = await idbGet(t.id);
+  if(seq !== qrSeq) return;
+  qrCur.data = data;
+  if(!data || (!data.qr && !data.page)){ msg.textContent = "No encuentro la imagen de este billete en el móvil. Vuelve a cargar su PDF."; msg.hidden = false; return; }
+  if(data.qr) setQrImg(data.qr, false);
+  else { setQrImg(data.page, true); qrCur.full = true; $("qrFull").hidden = true; msg.textContent = "No he localizado el QR en el PDF: se enseña el billete entero."; msg.hidden = false; }
+}
+function closeQr(noReturn){
+  qrSeq++;
+  const back = qrReturn; qrReturn = "";
+  $("qrView").hidden = true; setQrImg("", false); bright(false);
+  if(back === "review" && !noReturn) openReview();
+}
+$("qrClose").addEventListener("click", () => closeQr());
+$("qrFull").addEventListener("click", () => {
+  if(!qrCur || !qrCur.data) return;
+  qrCur.full = !qrCur.full;
+  setQrImg(qrCur.full ? qrCur.data.page : qrCur.data.qr, qrCur.full);
+  $("qrFull").textContent = qrCur.full ? "Ver solo el QR" : "Ver billete completo";
+});
+$("qrWrong").addEventListener("click", () => {
+  if(!qrCur || !qrCur.p || !qrCur.t) return;
+  const p = qrCur.p; unsetTicket(qrCur.t); save(); render();
+  closeQr(true); openReview("Billete quitado a " + shortName(p) + ". Asígnalo a quien corresponda.");
+});
+
 /* Boton atras de Android: cierra lo abierto antes de salir */
 window.handleBack = function(){
-  const open = ["csvSheet", "sheet", "resumeSheet", "moreSheet", "seatSheet", "doneSheet", "moveSheet"].find(id => !$(id).hidden);
+  if(!$("qrView").hidden){ closeQr(); return true; }
+  const open = SHEETS.find(id => !$(id).hidden);
   if(open){ closeSheets(); return true; }
+  if(!S.pax.length && S.mode){ S.mode = ""; render(); return true; }
   if($("q").value){ $("q").value = ""; $("clear").hidden = true; render(); return true; }
   if(camOn){ camStop(); updateScanner(); return true; }
   if(voiceOn){ $("voiceBtn").click(); return true; }
@@ -1404,7 +1966,7 @@ window.handleBack = function(){
 };
 
 /* Arranque */
-$("resumeNew").addEventListener("click", () => { replaceMode = true; $("filePdf").click(); });
+$("resumeNew").addEventListener("click", () => { closeSheets(); wipeAll(); });
 $("resumeKeep").addEventListener("click", closeSheets);
 $("resumeAdd").addEventListener("click", () => { replaceMode = false; $("filePdf").click(); });
 
@@ -1414,6 +1976,8 @@ render();
 if(S.pax.length){
   groupsInfo($("resumeInfo"), " presentes");
   if(S.coaches.length){ const d = el("div"); d.append(el("span", null, "Asientos"), el("strong", null, S.pax.filter(p => p.asiento).length + " asignados en " + S.coaches.length + " coches")); $("resumeInfo").append(d); }
+  if(isQr()){ const d = el("div"); d.append(el("span", null, "Pasar lista con QR · billetes"), el("strong", null, S.pax.filter(p => p.tk).length + " de " + S.pax.length)); $("resumeInfo").append(d); }
+  $("resumeNew").textContent = "Borrar lo anterior y empezar de cero";
   $("resumeSub").textContent = S.groups.length > 1 ? "Tienes " + S.groups.length + " listados guardados en este móvil:" : "Tienes un listado guardado en este móvil:";
   $("resumeSheet").hidden = false;
 }
