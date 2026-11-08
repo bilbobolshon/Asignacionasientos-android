@@ -14,10 +14,12 @@ def inline(m):
 html = re.sub(r'<script src="lib/([^"]+)"></script>', inline, html)
 
 worker = esc((WWW / "lib/pdf.worker.min.js").read_text(encoding="utf-8"))
-html = html.replace("<script>/* pdf.min.js */", '<script type="text/plain" id="pdfWorkerSrc">' + worker + "</script>\n<script>/* pdf.min.js */", 1)
+# el lector de PDF trabaja en la propia página (sin "worker" aparte): así funciona aunque el archivo se abra
+# desde el móvil (content://, visor de HTML…) donde el navegador no deja crear workers
+html = html.replace("<script>/* pdf.min.js */", "<script>/* pdf.worker.min.js */\n" + worker + "\n</script>\n<script>/* pdf.min.js */", 1)
 old = 'pdfjsLib.GlobalWorkerOptions.workerSrc = BASE + "lib/pdf.worker.min.js";'
 assert old in html
-html = html.replace(old, 'pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([document.getElementById("pdfWorkerSrc").textContent], { type: "text/javascript" }));')
+html = html.replace(old, 'pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.js"; /* no se usa: pdfjsWorker ya está cargado */')
 
 old_ocr = re.search(r"function loadOcr\(\)\{.*?\n\}\n", html, re.S).group(0)
 new_ocr = '''function loadOcr(){

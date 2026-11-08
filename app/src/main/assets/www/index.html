@@ -796,7 +796,7 @@ async function handleSeatPdf(f){
   try{
     const texts = await pdfToTexts(new Uint8Array(await f.arrayBuffer()));
     showParsedSeats(parseSeatText(texts), f.name.replace(/\.pdf$/i, ""));
-  }catch(e){ toast("No se pudo leer " + f.name + "."); }
+  }catch(e){ toast("No se pudo leer " + f.name + (e && e.message ? " (" + e.message + ")" : "") + "."); }
 }
 $("fileSeats").addEventListener("change", ev => { const f = ev.target.files[0]; ev.target.value = ""; if(f) handleSeatPdf(f); });
 $("seatPick").addEventListener("click", () => $("fileSeats").click());
@@ -1064,7 +1064,7 @@ async function handlePdfs(files){
       const { label, rows } = parseManifest(pages);
       if(!rows.length){ toast("No reconozco el formato de " + f.name + ". Usa la opción CSV."); continue; }
       parsed.push({ label, rows, name: f.name.replace(/\.pdf$/i,"") });
-    }catch(e){ toast("No se pudo leer " + f.name + "."); }
+    }catch(e){ toast("No se pudo leer " + f.name + (e && e.message ? " (" + e.message + ")" : "") + "."); }
   }
   if(!parsed.length) return;
   if(replace){ S = fresh(S.mode); idbClear(); tab = "pend"; $("q").value = ""; $("clear").hidden = true; }
@@ -1749,7 +1749,7 @@ async function processTicketFiles(files){
   if(!window.pdfjsLib){ toast("No se pudo preparar el lector de PDF. Cierra la app y vuelve a abrirla."); return; }
   tkBusy = true; $("tkPick").hidden = true; $("tkLater").hidden = true;
   $("tkSub").textContent = "Leyendo los billetes. Puede tardar un poco (unos segundos por billete): no cierres la app.";
-  let added = 0, dup = 0, bad = 0, noCode = 0;
+  let added = 0, dup = 0, bad = 0, noCode = 0, lastErr = "";
   for(let k = 0; k < files.length; k++){
     const f = files[k];
     tkProgress("Billete " + (k + 1) + " de " + files.length + " · " + f.name, k / files.length);
@@ -1773,7 +1773,7 @@ async function processTicketFiles(files){
         S.tickets.push(t); added++; if(t.noQr) noCode++;
         linkTicket(t);
       }
-    }catch(e){ bad++; }
+    }catch(e){ bad++; lastErr = e && e.message ? e.message : String(e); }
     try{ pdf && await pdf.destroy(); }catch(e){}
     save();
     await new Promise(res => setTimeout(res, 0));
@@ -1782,7 +1782,7 @@ async function processTicketFiles(files){
   tkBusy = false;
   const msg = [added + " billetes leídos"];
   if(dup) msg.push(dup + " repetidos (ya estaban cargados)");
-  if(bad) msg.push(bad + " archivos que no se han podido abrir");
+  if(bad) msg.push(bad + " archivos que no se han podido abrir (" + lastErr + ")");
   if(noCode) msg.push(noCode + " sin QR localizado");
   render();
   openReview(msg.join(" · ") + ".");
